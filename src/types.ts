@@ -9,6 +9,7 @@ export type ScreenType =
   | 'number-stepper'
   | 'date-picker'
   | 'slider'
+  | 'ranking'
 
 export interface Field {
   label: string

@@ -11,6 +11,7 @@ import CheckboxScreen from './screens/CheckboxScreen'
 import NumberStepperScreen from './screens/NumberStepperScreen'
 import DatePickerScreen from './screens/DatePickerScreen'
 import SliderScreen from './screens/SliderScreen'
+import RankingScreen from './screens/RankingScreen'
 
 const STORAGE_PREFIX = 'weave-flow-'
 
@@ -60,6 +61,7 @@ function isAnswerValid(type: import('../types').ScreenType, answer: Answer): boo
     case 'intro':
     case 'number-stepper':
     case 'slider':
+    case 'ranking':
       return true
     case 'text-input':
       return typeof answer === 'string' && answer.trim().length > 0
@@ -395,5 +397,7 @@ function ScreenRenderer({
       return <DatePickerScreen screen={screen} value={value} onChange={onChange} />
     case 'slider':
       return <SliderScreen screen={screen} value={value} onChange={onChange} />
+    case 'ranking':
+      return <RankingScreen screen={screen} value={value} onChange={onChange} />
   }
 }
