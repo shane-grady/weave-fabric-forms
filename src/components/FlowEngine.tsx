@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo, useEffect } from 'react'
 import type { Flow, Answer } from '../types'
+import { serializeFlow, saveFlowExport } from '../export'
 import IntroScreen from './screens/IntroScreen'
 import MultiSelectScreen from './screens/MultiSelectScreen'
 import SingleSelectScreen from './screens/SingleSelectScreen'
@@ -107,12 +108,13 @@ export default function FlowEngine({
       if (targetIndex >= flow.screens.length) {
         clearFlowState(flow.id)
         markFlowCompleted(flow.id)
+        saveFlowExport(serializeFlow(flow, answers))
         setCompleted(true)
       } else {
         setCurrentIndex(targetIndex)
       }
     },
-    [flow.screens.length, flow.id],
+    [flow, answers],
   )
 
   const getNextIndex = useCallback(
