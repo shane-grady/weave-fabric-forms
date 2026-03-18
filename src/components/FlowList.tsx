@@ -89,6 +89,27 @@ export default function FlowList({
     )
   }, [flows, query])
 
+  const grouped = useMemo(() => {
+    const map = new Map<string, Flow[]>()
+    for (const flow of filtered) {
+      const group = flow.category.includes(' — ')
+        ? flow.category.split(' — ')[0]
+        : flow.category
+      const list = map.get(group) ?? []
+      list.push(flow)
+      map.set(group, list)
+    }
+    return map
+  }, [filtered])
+
+  const [collapsed, setCollapsed] = useState<Set<string>>(new Set())
+  const toggleSection = (group: string) =>
+    setCollapsed((prev) => {
+      const next = new Set(prev)
+      next.has(group) ? next.delete(group) : next.add(group)
+      return next
+    })
+
   return (
     <div className="app">
       <div className="flow-list">
@@ -129,40 +150,57 @@ export default function FlowList({
           />
         </div>
         <div className="flow-grid">
-          {filtered.map((flow) => {
-            const isDone = completed.has(flow.id)
-            const { answered, total } = getFlowProgress(flow, isDone)
-            return (
+          {[...grouped.entries()].map(([group, groupFlows]) => (
+            <div key={group} className="flow-section">
               <button
-                key={flow.id}
-                className={`flow-card ${isDone ? 'flow-card--done' : ''}`}
-                onClick={() => onSelect(flow)}
+                className="flow-section-header"
+                onClick={() => toggleSection(group)}
                 type="button"
+                aria-expanded={!collapsed.has(group)}
               >
-                <div className="flow-card-icon">
-                  {FLOW_ICONS[flow.id] ?? '✨'}
-                </div>
-                <div className="flow-card-content">
-                  <div className="flow-card-title">{flow.title}</div>
-                  <div className="flow-card-desc">{flow.introCopy}</div>
-                  {answered > 0 && (
-                    <div className="flow-card-progress">
-                      {isDone ? 'Complete' : `${answered} of ${total} answered`}
-                    </div>
-                  )}
-                </div>
-                {isDone ? (
-                  <span className="flow-card-check">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                  </span>
-                ) : (
-                  <span className="flow-card-arrow">›</span>
-                )}
+                <span className="flow-section-title">{group}</span>
+                <span className={`flow-section-chevron ${collapsed.has(group) ? 'flow-section-chevron--collapsed' : ''}`}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="6 9 12 15 18 9" />
+                  </svg>
+                </span>
               </button>
-            )
-          })}
+              {!collapsed.has(group) && groupFlows.map((flow) => {
+                const isDone = completed.has(flow.id)
+                const { answered, total } = getFlowProgress(flow, isDone)
+                return (
+                  <button
+                    key={flow.id}
+                    className={`flow-card ${isDone ? 'flow-card--done' : ''}`}
+                    onClick={() => onSelect(flow)}
+                    type="button"
+                  >
+                    <div className="flow-card-icon">
+                      {FLOW_ICONS[flow.id] ?? '✨'}
+                    </div>
+                    <div className="flow-card-content">
+                      <div className="flow-card-title">{flow.title}</div>
+                      <div className="flow-card-desc">{flow.introCopy}</div>
+                      {answered > 0 && (
+                        <div className="flow-card-progress">
+                          {isDone ? 'Complete' : `${answered} of ${total} answered`}
+                        </div>
+                      )}
+                    </div>
+                    {isDone ? (
+                      <span className="flow-card-check">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                      </span>
+                    ) : (
+                      <span className="flow-card-arrow">›</span>
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+          ))}
         </div>
       </div>
     </div>

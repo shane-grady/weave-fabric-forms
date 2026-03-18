@@ -1227,7 +1227,50 @@ body {
 .flow-grid {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
+}
+
+.flow-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.flow-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: none;
+  border: none;
+  padding: 4px 0;
+  cursor: pointer;
+  font-family: var(--font);
+  user-select: none;
+}
+
+.flow-section-title {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--text-primary);
+  opacity: 0.5;
+}
+
+.flow-section-chevron {
+  width: 20px;
+  height: 20px;
+  color: var(--text-secondary);
+  transition: transform 0.2s ease;
+}
+
+.flow-section-chevron svg {
+  width: 20px;
+  height: 20px;
+}
+
+.flow-section-chevron--collapsed {
+  transform: rotate(-90deg);
 }
 
 .flow-card {
