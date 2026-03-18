@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import type { Flow, Answer } from '../types'
 
 function getCompletedFlows(): Set<string> {
@@ -61,6 +61,17 @@ export default function FlowList({
     [flows, completed],
   )
   const overallPct = flows.length > 0 ? Math.round((completedCount / flows.length) * 100) : 0
+  const [query, setQuery] = useState('')
+
+  const filtered = useMemo(() => {
+    if (!query.trim()) return flows
+    const q = query.toLowerCase()
+    return flows.filter(
+      (f) =>
+        f.title.toLowerCase().includes(q) ||
+        f.category.toLowerCase().includes(q),
+    )
+  }, [flows, query])
 
   return (
     <div className="app">
@@ -83,8 +94,17 @@ export default function FlowList({
             </span>
           </div>
         </div>
+        <div className="flow-search-wrap">
+          <input
+            className="flow-search"
+            type="text"
+            placeholder="Search flows..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+        </div>
         <div className="flow-grid">
-          {flows.map((flow) => {
+          {filtered.map((flow) => {
             const isDone = completed.has(flow.id)
             const { answered, total } = getFlowProgress(flow, isDone)
             return (
