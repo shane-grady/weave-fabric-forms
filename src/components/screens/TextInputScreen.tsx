@@ -22,6 +22,7 @@ export default function TextInputScreen({
         onChange={(e) => onChange(max ? e.target.value.slice(0, max) : e.target.value)}
         maxLength={max}
         autoFocus
+        aria-label={screen.question}
       />
       {max != null && (
         <div className={`char-count ${text.length >= max ? 'char-count--limit' : ''}`}>
