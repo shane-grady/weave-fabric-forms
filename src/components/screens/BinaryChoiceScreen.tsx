@@ -1,4 +1,5 @@
 import type { FlowScreen, Answer } from '../../types'
+import { haptic } from '../../haptic'
 
 export default function BinaryChoiceScreen({
   screen,
@@ -17,14 +18,14 @@ export default function BinaryChoiceScreen({
       <div className="binary-choices">
         <button
           className={`binary-btn binary-btn--yes ${selected === 'yes' ? 'binary-btn--selected' : ''}`}
-          onClick={() => onChange('yes')}
+          onClick={() => { haptic(); onChange('yes') }}
           type="button"
         >
           Yes
         </button>
         <button
           className={`binary-btn binary-btn--no ${selected === 'no' ? 'binary-btn--selected' : ''}`}
-          onClick={() => onChange('no')}
+          onClick={() => { haptic(); onChange('no') }}
           type="button"
         >
           No

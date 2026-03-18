@@ -1,4 +1,5 @@
 import type { FlowScreen, Answer } from '../../types'
+import { haptic } from '../../haptic'
 
 export default function SingleSelectScreen({
   screen,
@@ -20,7 +21,7 @@ export default function SingleSelectScreen({
           <button
             key={opt}
             className={`radio-option ${selected === opt ? 'radio-option--selected' : ''}`}
-            onClick={() => onChange(opt)}
+            onClick={() => { haptic(); onChange(opt) }}
             type="button"
           >
             <span className="radio-circle">
