@@ -11,6 +11,7 @@ export type ScreenType =
   | 'slider'
   | 'ranking'
   | 'tag-input'
+  | 'image-select'
 
 export interface Field {
   label: string
@@ -36,6 +37,7 @@ export interface FlowScreen {
   min?: number
   max?: number
   step?: number
+  images?: string[]
 }
 
 export interface Flow {
