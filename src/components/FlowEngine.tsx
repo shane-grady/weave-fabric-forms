@@ -65,6 +65,7 @@ export default function FlowEngine({
       <div className="app">
         <NavBar title={flow.category} onBack={onExit} />
         <div className="screen-card">
+          <div className="confetti" aria-hidden="true" />
           <div className="completion">
             <div className="completion-icon">✨</div>
             <h1 className="completion-title">All done!</h1>
