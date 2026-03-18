@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo } from 'react'
 import type { Flow, Answer } from '../types'
+import { usePersistedAnswers, clearFlowState } from '../hooks/usePersistedAnswers'
 import IntroScreen from './screens/IntroScreen'
 import MultiSelectScreen from './screens/MultiSelectScreen'
 import SingleSelectScreen from './screens/SingleSelectScreen'
@@ -16,8 +17,8 @@ export default function FlowEngine({
   flow: Flow
   onExit: () => void
 }) {
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const [answers, setAnswers] = useState<Record<number, Answer>>({})
+  const { answers, currentIndex, setAnswers, setCurrentIndex } =
+    usePersistedAnswers(flow.id)
   const [completed, setCompleted] = useState(false)
   const [animKey, setAnimKey] = useState(0)
 
@@ -55,6 +56,7 @@ export default function FlowEngine({
     (targetIndex: number) => {
       setAnimKey((k) => k + 1)
       if (targetIndex >= flow.screens.length) {
+        clearFlowState(flow.id)
         setCompleted(true)
       } else {
         setCurrentIndex(targetIndex)
