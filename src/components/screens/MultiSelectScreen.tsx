@@ -1,4 +1,5 @@
 import type { FlowScreen, Answer } from '../../types'
+import { haptic } from '../../haptic'
 
 export default function MultiSelectScreen({
   screen,
@@ -12,6 +13,7 @@ export default function MultiSelectScreen({
   const selected = (value as string[]) ?? []
 
   const toggle = (opt: string) => {
+    haptic()
     onChange(
       selected.includes(opt)
         ? selected.filter((s) => s !== opt)

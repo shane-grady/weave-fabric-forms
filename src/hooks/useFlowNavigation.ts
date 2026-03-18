@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react'
 import type { Flow, FlowScreen, Answer, ScreenType } from '../types'
 import { serializeFlow, saveFlowExport } from '../export'
+import { haptic } from '../haptic'
 
 const STORAGE_PREFIX = 'weave-flow-'
 const COMPLETED_KEY = 'weave-completed-flows'
@@ -123,6 +124,7 @@ export default function useFlowNavigation(flow: Flow, onExit: () => void) {
 
   const navigate = useCallback(
     (targetIndex: number) => {
+      haptic()
       const fromIdx = currentIndex
       setDirection('forward')
       setAnimKey((k) => k + 1)
@@ -168,6 +170,7 @@ export default function useFlowNavigation(flow: Flow, onExit: () => void) {
 
   const handleBack = useCallback(() => {
     if (currentIndex === 0) { onExit(); return }
+    haptic()
     setUndoIndex(null)
     if (undoTimer.current) clearTimeout(undoTimer.current)
     setDirection('back')
