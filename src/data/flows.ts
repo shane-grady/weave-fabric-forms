@@ -1334,6 +1334,96 @@ const yourGoals: Flow = {
   ],
 }
 
+// ─── Flow 17 · Daily Routine ─────────────────────────────────────
+const dailyRoutine: Flow = {
+  id: 'daily-routine',
+  title: 'Daily Routine',
+  category: 'Lifestyle',
+  introCopy:
+    'Your day-to-day rhythms shape what Weave can help with — from morning planning to evening wind-down.',
+  icon: '⏰',
+  screens: [
+    {
+      type: 'intro',
+      question: 'Daily Routine',
+      introCopy:
+        'Your day-to-day rhythms shape what Weave can help with — from morning planning to evening wind-down.',
+    },
+    {
+      type: 'single-select',
+      question: 'When do you usually wake up?',
+      options: [
+        'before 6am', '6–7am', '7–8am', '8–9am',
+        '9–10am', 'after 10am', 'it varies a lot',
+      ],
+      memoryTags: ['#wake-time'],
+    },
+    {
+      type: 'multi-select',
+      question: 'Morning habits?',
+      options: [
+        'coffee first', 'exercise', 'meditation', 'shower',
+        'check phone', 'breakfast', 'journaling', 'walk the dog',
+        'scroll social media', 'straight to work', 'none — chaos',
+      ],
+      memoryTags: ['#morning-habits'],
+    },
+    {
+      type: 'single-select',
+      question: 'When do you start working?',
+      options: [
+        'before 8am', '8–9am', '9–10am', '10am+',
+        'varies by day', "I don't have set hours",
+      ],
+      memoryTags: ['#work-start-time'],
+    },
+    {
+      type: 'single-select',
+      question: 'Lunch situation?',
+      options: [
+        'meal prep', 'buy lunch out', 'skip it often',
+        'eat at my desk', 'proper lunch break', 'graze all day',
+      ],
+      memoryTags: ['#lunch-habit'],
+    },
+    {
+      type: 'single-select',
+      question: 'Energy peak?',
+      subtitle: 'When are you most productive?',
+      options: [
+        'early morning', 'late morning', 'early afternoon',
+        'late afternoon', 'evening', 'night owl — after 9pm',
+      ],
+      memoryTags: ['#peak-energy'],
+    },
+    {
+      type: 'multi-select',
+      question: 'Evening wind-down?',
+      options: [
+        'cook dinner', 'watch TV / streaming', 'read', 'exercise',
+        'time with family', 'social plans', 'gaming', 'side projects',
+        'bath / skincare', 'scroll phone', 'nothing — I crash',
+      ],
+      memoryTags: ['#evening-routine'],
+    },
+    {
+      type: 'single-select',
+      question: 'When do you go to bed?',
+      options: [
+        'before 10pm', '10–11pm', '11pm–midnight',
+        'midnight–1am', 'after 1am', 'inconsistent',
+      ],
+      memoryTags: ['#bedtime'],
+    },
+    {
+      type: 'text-input',
+      question: 'Anything else about your routine?',
+      placeholder: 'I take a 20-min nap at 2pm, Wednesdays are my no-meeting day',
+      memoryTags: ['#routine-notes'],
+    },
+  ],
+}
+
 // ─── Export All Flows ─────────────────────────────────────────────
 export const allFlows: Flow[] = [
   aboutYou,
@@ -1352,4 +1442,5 @@ export const allFlows: Flow[] = [
   yourSpace,
   importantStuff,
   yourGoals,
+  dailyRoutine,
 ]
