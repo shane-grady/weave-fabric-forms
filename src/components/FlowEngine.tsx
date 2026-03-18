@@ -134,7 +134,12 @@ export default function FlowEngine({
         <div className="screen-card">
           <div className="confetti" aria-hidden="true" />
           <div className="completion">
-            <div className="completion-icon">✨</div>
+            <div className="completion-icon">
+              <svg className="checkmark-svg" viewBox="0 0 52 52" fill="none">
+                <circle className="checkmark-circle" cx="26" cy="26" r="24" stroke="currentColor" strokeWidth="3" />
+                <path className="checkmark-path" d="M15 27l7 7 15-15" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
             <h1 className="completion-title">All done!</h1>
             <p className="completion-desc">
               You've completed the {flow.title} flow. Your memories have been

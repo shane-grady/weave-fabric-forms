@@ -1378,8 +1378,36 @@ body {
 }
 
 .completion-icon {
-  font-size: 64px;
+  width: 80px;
+  height: 80px;
   margin-bottom: 24px;
+  color: var(--text-primary);
+}
+
+.checkmark-svg {
+  width: 80px;
+  height: 80px;
+}
+
+.checkmark-circle {
+  stroke-dasharray: 151;
+  stroke-dashoffset: 151;
+  animation: checkCircle 0.5s ease-out 0.2s forwards;
+  opacity: 0.4;
+}
+
+.checkmark-path {
+  stroke-dasharray: 36;
+  stroke-dashoffset: 36;
+  animation: checkStroke 0.35s ease-out 0.55s forwards;
+}
+
+@keyframes checkCircle {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes checkStroke {
+  to { stroke-dashoffset: 0; }
 }
 
 .completion-title {
