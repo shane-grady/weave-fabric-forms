@@ -775,6 +775,85 @@ body {
 }
 
 /* ============================================
+   Ranking (Drag to Reorder)
+   ============================================ */
+
+.ranking-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ranking-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 18px;
+  background: var(--chip);
+  border-radius: var(--radius-chip);
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  user-select: none;
+}
+
+.ranking-item--dragging {
+  opacity: 0.4;
+  transform: scale(0.96);
+}
+
+.ranking-item--shift-down {
+  transform: translateY(6px);
+}
+
+.ranking-item--shift-up {
+  transform: translateY(-6px);
+}
+
+.ranking-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  flex-shrink: 0;
+}
+
+.ranking-label {
+  flex: 1;
+  font-size: 17px;
+  font-weight: 500;
+  color: var(--text-primary);
+  min-width: 0;
+}
+
+.ranking-grip {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  cursor: grab;
+  color: rgba(255, 255, 255, 0.4);
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+
+.ranking-grip:active {
+  cursor: grabbing;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.ranking-grip svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* ============================================
    Flow List (Landing Page)
    ============================================ */
 
