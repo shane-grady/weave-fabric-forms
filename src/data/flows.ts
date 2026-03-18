@@ -25,9 +25,8 @@ const aboutYou: Flow = {
       memoryTags: ['#full-name', '#nickname'],
     },
     {
-      type: 'text-input',
+      type: 'date-picker',
       question: "When's your birthday?",
-      placeholder: 'March 14, 1990',
       memoryTags: ['#birthday'],
     },
     {

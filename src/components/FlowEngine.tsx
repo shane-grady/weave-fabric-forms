@@ -9,6 +9,7 @@ import TextInputScreen from './screens/TextInputScreen'
 import MultiInputScreen from './screens/MultiInputScreen'
 import CheckboxScreen from './screens/CheckboxScreen'
 import NumberStepperScreen from './screens/NumberStepperScreen'
+import DatePickerScreen from './screens/DatePickerScreen'
 
 const STORAGE_PREFIX = 'weave-flow-'
 
@@ -68,6 +69,8 @@ function isAnswerValid(type: import('../types').ScreenType, answer: Answer): boo
     case 'single-select':
     case 'binary-choice':
       return answer != null && answer !== ''
+    case 'date-picker':
+      return typeof answer === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(answer)
   }
 }
 
@@ -386,5 +389,7 @@ function ScreenRenderer({
       return <CheckboxScreen screen={screen} value={value} onChange={onChange} />
     case 'number-stepper':
       return <NumberStepperScreen screen={screen} value={value} onChange={onChange} />
+    case 'date-picker':
+      return <DatePickerScreen screen={screen} value={value} onChange={onChange} />
   }
 }

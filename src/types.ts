@@ -7,6 +7,7 @@ export type ScreenType =
   | 'multi-input'
   | 'checkbox'
   | 'number-stepper'
+  | 'date-picker'
 
 export interface Field {
   label: string
