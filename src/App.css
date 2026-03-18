@@ -854,6 +854,97 @@ body {
 }
 
 /* ============================================
+   Tag Input
+   ============================================ */
+
+.tag-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  background: var(--chip-selected);
+  color: var(--chip-selected-text);
+  border-radius: 20px;
+  font-family: var(--font);
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.tag-chip-remove {
+  width: 20px;
+  height: 20px;
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--chip-selected-text);
+  opacity: 0.6;
+  transition: opacity 0.15s;
+}
+
+.tag-chip-remove:active {
+  opacity: 1;
+}
+
+.tag-chip-remove svg {
+  width: 14px;
+  height: 14px;
+}
+
+.tag-input {
+  width: 100%;
+  padding: 16px 18px;
+  background: var(--input-bg);
+  border-radius: var(--radius-input);
+  border: none;
+  font-family: var(--font);
+  font-size: 17px;
+  font-weight: 400;
+  color: var(--text-primary);
+  outline: none;
+}
+
+.tag-input::placeholder {
+  color: var(--input-placeholder);
+}
+
+.tag-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.tag-suggestion {
+  padding: 10px 16px;
+  background: var(--chip);
+  border-radius: 20px;
+  border: none;
+  font-family: var(--font);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+
+.tag-suggestion:active {
+  transform: scale(0.96);
+  background: var(--chip-selected);
+  color: var(--chip-selected-text);
+}
+
+/* ============================================
    Flow List (Landing Page)
    ============================================ */
 

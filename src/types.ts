@@ -10,6 +10,7 @@ export type ScreenType =
   | 'date-picker'
   | 'slider'
   | 'ranking'
+  | 'tag-input'
 
 export interface Field {
   label: string

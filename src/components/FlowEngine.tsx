@@ -12,6 +12,7 @@ import NumberStepperScreen from './screens/NumberStepperScreen'
 import DatePickerScreen from './screens/DatePickerScreen'
 import SliderScreen from './screens/SliderScreen'
 import RankingScreen from './screens/RankingScreen'
+import TagInputScreen from './screens/TagInputScreen'
 
 const STORAGE_PREFIX = 'weave-flow-'
 
@@ -69,6 +70,7 @@ function isAnswerValid(type: import('../types').ScreenType, answer: Answer): boo
       return Array.isArray(answer) && answer.some((v) => typeof v === 'string' && v.trim().length > 0)
     case 'multi-select':
     case 'checkbox':
+    case 'tag-input':
       return Array.isArray(answer) && answer.length > 0
     case 'single-select':
     case 'binary-choice':
@@ -399,5 +401,7 @@ function ScreenRenderer({
       return <SliderScreen screen={screen} value={value} onChange={onChange} />
     case 'ranking':
       return <RankingScreen screen={screen} value={value} onChange={onChange} />
+    case 'tag-input':
+      return <TagInputScreen screen={screen} value={value} onChange={onChange} />
   }
 }
