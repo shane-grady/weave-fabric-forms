@@ -296,7 +296,7 @@ export default function FlowEngine({
       <div className="screen-card" key={animKey}>
         <div className={`screen screen--${direction}`} ref={screenRef}>
           <ProgressBar current={mainStep} total={totalMain} />
-          <div className="screen-content">
+          <div className="screen-content" aria-live="polite">
             <ScreenRenderer
               screen={screen}
               flowId={flow.id}

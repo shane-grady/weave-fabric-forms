@@ -12,7 +12,7 @@ export default function BottomNav({
   onNext: () => void
 }) {
   return (
-    <div className="bottom-nav">
+    <nav className="bottom-nav" aria-label="Flow navigation">
       <button className="btn btn-done" onClick={onDone} type="button">
         Done
       </button>
@@ -33,6 +33,6 @@ export default function BottomNav({
         </svg>
         Next
       </button>
-    </div>
+    </nav>
   )
 }

@@ -6,7 +6,14 @@ export default function ProgressBar({
   total: number
 }) {
   return (
-    <div className="progress-bar">
+    <div
+      className="progress-bar"
+      role="progressbar"
+      aria-valuenow={current}
+      aria-valuemin={0}
+      aria-valuemax={total}
+      aria-label={`Step ${current} of ${total}`}
+    >
       <div className="progress-segments">
         {Array.from({ length: total }, (_, i) => (
           <div
