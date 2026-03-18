@@ -28,6 +28,25 @@ export default function FlowEngine({
 }) {
   const nav = useFlowNavigation(flow, onExit)
 
+  // Swipe gesture detection
+  const touchStartX = useRef(0)
+  const navNextRef = useRef(nav.handleNext)
+  const navBackRef = useRef(nav.handleBack)
+  const canAdvanceRef = useRef(nav.canAdvance)
+  navNextRef.current = nav.handleNext
+  navBackRef.current = nav.handleBack
+  canAdvanceRef.current = nav.canAdvance
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX
+  }
+  const onTouchEnd = (e: React.TouchEvent) => {
+    const dx = e.changedTouches[0].clientX - touchStartX.current
+    if (Math.abs(dx) < 50) return
+    if (dx < 0 && canAdvanceRef.current) navNextRef.current()
+    else if (dx > 0) navBackRef.current()
+  }
+
   // Focus first interactive element on screen transition
   const screenRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
@@ -67,7 +86,7 @@ export default function FlowEngine({
   return (
     <div className="app">
       <NavBar title={flow.category} onBack={nav.handleBack} />
-      <div className="screen-card" key={nav.animKey}>
+      <div className="screen-card" key={nav.animKey} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
         <div className={`screen screen--${nav.direction}`} ref={screenRef}>
           <ProgressBar current={nav.mainStep} total={nav.totalMain} />
           <div className="screen-content" aria-live="polite">
