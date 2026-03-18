@@ -95,6 +95,8 @@ export default function FlowEngine({
   const [completed, setCompleted] = useState(false)
   const [animKey, setAnimKey] = useState(0)
   const [direction, setDirection] = useState<'forward' | 'back'>('forward')
+  const [undoIndex, setUndoIndex] = useState<number | null>(null)
+  const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     if (!completed) {
@@ -132,8 +134,27 @@ export default function FlowEngine({
 
   const totalMain = mainIndices.length
 
+  const showUndo = useCallback(
+    (fromIndex: number) => {
+      if (undoTimer.current) clearTimeout(undoTimer.current)
+      setUndoIndex(fromIndex)
+      undoTimer.current = setTimeout(() => setUndoIndex(null), 3000)
+    },
+    [],
+  )
+
+  const handleUndo = useCallback(() => {
+    if (undoIndex === null) return
+    if (undoTimer.current) clearTimeout(undoTimer.current)
+    setDirection('back')
+    setAnimKey((k) => k + 1)
+    setCurrentIndex(undoIndex)
+    setUndoIndex(null)
+  }, [undoIndex])
+
   const navigate = useCallback(
     (targetIndex: number) => {
+      const fromIdx = currentIndex
       setDirection('forward')
       setAnimKey((k) => k + 1)
       if (targetIndex >= flow.screens.length) {
@@ -143,9 +164,12 @@ export default function FlowEngine({
         setCompleted(true)
       } else {
         setCurrentIndex(targetIndex)
+        if (flow.screens[fromIdx].type !== 'intro') {
+          showUndo(fromIdx)
+        }
       }
     },
-    [flow, answers],
+    [flow, answers, currentIndex, showUndo],
   )
 
   const getNextIndex = useCallback(
@@ -184,6 +208,8 @@ export default function FlowEngine({
       onExit()
       return
     }
+    setUndoIndex(null)
+    if (undoTimer.current) clearTimeout(undoTimer.current)
     setDirection('back')
     setAnimKey((k) => k + 1)
     setCurrentIndex((prev) => Math.max(0, prev - 1))
@@ -284,6 +310,15 @@ export default function FlowEngine({
           />
         </div>
       </div>
+      {undoIndex !== null && (
+        <button className="undo-toast" onClick={handleUndo} type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" width="16" height="16">
+            <polyline points="1 4 1 10 7 10" />
+            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
+          </svg>
+          Undo
+        </button>
+      )}
     </div>
   )
 }
