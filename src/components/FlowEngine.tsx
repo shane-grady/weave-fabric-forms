@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect } from 'react'
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react'
 import type { Flow, Answer } from '../types'
 import { serializeFlow, saveFlowExport } from '../export'
 import IntroScreen from './screens/IntroScreen'
@@ -182,6 +182,48 @@ export default function FlowEngine({
     [currentIndex],
   )
 
+  const currentAnswer = answers[currentIndex] ?? null
+  const canAdvance = isAnswerValid(screen.type, currentAnswer)
+
+  // Keyboard navigation — refs avoid stale closures, effect stays stable
+  const nextRef = useRef(handleNext)
+  const backRef = useRef(handleBack)
+  const canAdvanceRef = useRef(canAdvance)
+  nextRef.current = handleNext
+  backRef.current = handleBack
+  canAdvanceRef.current = canAdvance
+
+  useEffect(() => {
+    if (completed) return
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Enter') {
+        if ((e.target as HTMLElement)?.tagName === 'TEXTAREA') return
+        if (!canAdvanceRef.current) return
+        e.preventDefault()
+        nextRef.current()
+      }
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        backRef.current()
+      }
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [completed])
+
+  // Focus first interactive element on screen transition
+  const screenRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const el = screenRef.current
+    if (!el) return
+    const focusable = el.querySelector<HTMLElement>(
+      'input, textarea, button:not(.nav-back):not(.btn-done):not(.btn-skip):not(.btn-next)',
+    )
+    if (focusable) {
+      requestAnimationFrame(() => focusable.focus())
+    }
+  }, [animKey])
+
   if (completed) {
     return (
       <div className="app">
@@ -204,14 +246,12 @@ export default function FlowEngine({
   }
 
   const isIntro = screen.type === 'intro'
-  const currentAnswer = answers[currentIndex] ?? null
-  const canAdvance = isAnswerValid(screen.type, currentAnswer)
 
   return (
     <div className="app">
       <NavBar title={flow.category} onBack={handleBack} />
       <div className="screen-card" key={animKey}>
-        <div className="screen" style={{ animation: 'screenIn 0.25s ease-out' }}>
+        <div className="screen" ref={screenRef} style={{ animation: 'screenIn 0.25s ease-out' }}>
           <ProgressBar current={mainStep} total={totalMain} />
           <div className="screen-content">
             <ScreenRenderer
