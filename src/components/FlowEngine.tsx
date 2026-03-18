@@ -1,22 +1,23 @@
-import { useState, useCallback, useMemo, useEffect, useRef } from 'react'
+import { useState, useCallback, useMemo, useEffect, useRef, lazy, Suspense } from 'react'
 import type { Flow, Answer } from '../types'
 import { serializeFlow, saveFlowExport } from '../export'
-import IntroScreen from './screens/IntroScreen'
-import MultiSelectScreen from './screens/MultiSelectScreen'
-import SingleSelectScreen from './screens/SingleSelectScreen'
-import BinaryChoiceScreen from './screens/BinaryChoiceScreen'
-import TextInputScreen from './screens/TextInputScreen'
-import MultiInputScreen from './screens/MultiInputScreen'
-import CheckboxScreen from './screens/CheckboxScreen'
-import NumberStepperScreen from './screens/NumberStepperScreen'
-import DatePickerScreen from './screens/DatePickerScreen'
-import SliderScreen from './screens/SliderScreen'
-import RankingScreen from './screens/RankingScreen'
-import TagInputScreen from './screens/TagInputScreen'
-import ImageSelectScreen from './screens/ImageSelectScreen'
 import NavBar from './NavBar'
 import ProgressBar from './ProgressBar'
 import BottomNav from './BottomNav'
+
+const IntroScreen = lazy(() => import('./screens/IntroScreen'))
+const MultiSelectScreen = lazy(() => import('./screens/MultiSelectScreen'))
+const SingleSelectScreen = lazy(() => import('./screens/SingleSelectScreen'))
+const BinaryChoiceScreen = lazy(() => import('./screens/BinaryChoiceScreen'))
+const TextInputScreen = lazy(() => import('./screens/TextInputScreen'))
+const MultiInputScreen = lazy(() => import('./screens/MultiInputScreen'))
+const CheckboxScreen = lazy(() => import('./screens/CheckboxScreen'))
+const NumberStepperScreen = lazy(() => import('./screens/NumberStepperScreen'))
+const DatePickerScreen = lazy(() => import('./screens/DatePickerScreen'))
+const SliderScreen = lazy(() => import('./screens/SliderScreen'))
+const RankingScreen = lazy(() => import('./screens/RankingScreen'))
+const TagInputScreen = lazy(() => import('./screens/TagInputScreen'))
+const ImageSelectScreen = lazy(() => import('./screens/ImageSelectScreen'))
 
 const STORAGE_PREFIX = 'weave-flow-'
 
@@ -297,12 +298,14 @@ export default function FlowEngine({
         <div className={`screen screen--${direction}`} ref={screenRef}>
           <ProgressBar current={mainStep} total={totalMain} />
           <div className="screen-content" aria-live="polite">
-            <ScreenRenderer
-              screen={screen}
-              flowId={flow.id}
-              value={currentAnswer}
-              onChange={handleChange}
-            />
+            <Suspense fallback={<div className="screen-spinner" />}>
+              <ScreenRenderer
+                screen={screen}
+                flowId={flow.id}
+                value={currentAnswer}
+                onChange={handleChange}
+              />
+            </Suspense>
           </div>
           <BottomNav
             showSkip={!isIntro}
