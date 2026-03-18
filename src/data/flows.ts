@@ -1244,6 +1244,96 @@ const importantStuff: Flow = {
   ],
 }
 
+// ─── Flow 16 · Your Goals ────────────────────────────────────────
+const yourGoals: Flow = {
+  id: 'your-goals',
+  title: 'Your Goals',
+  category: 'Goals & Aspirations',
+  introCopy:
+    'Where are you headed? Knowing your goals helps Weave give advice that actually moves the needle.',
+  icon: '🎯',
+  screens: [
+    {
+      type: 'intro',
+      question: 'Your Goals',
+      introCopy:
+        'Where are you headed? Knowing your goals helps Weave give advice that actually moves the needle.',
+    },
+    {
+      type: 'multi-select',
+      question: 'What are you focused on right now?',
+      options: [
+        'career growth', 'health & fitness', 'relationships',
+        'financial freedom', 'learning new skills', 'creativity',
+        'travel & adventure', 'starting a business', 'mental health',
+        'giving back', 'finding balance', 'other',
+      ],
+      memoryTags: ['#current-priorities'],
+    },
+    {
+      type: 'text-input',
+      question: "What's your biggest goal this year?",
+      placeholder: 'Get promoted, run a marathon, save $20K, launch my side project',
+      memoryTags: ['#yearly-goal'],
+    },
+    {
+      type: 'single-select',
+      question: 'Where do you see yourself in 5 years?',
+      options: [
+        'same path, leveled up',
+        'completely different career',
+        'my own business',
+        'more balanced life',
+        'living somewhere new',
+        "honestly, I don't know yet",
+      ],
+      memoryTags: ['#five-year-vision'],
+    },
+    {
+      type: 'text-input',
+      question: "What's on your bucket list?",
+      placeholder: 'Visit Japan, write a book, learn to surf, speak at a conference',
+      memoryTags: ['#bucket-list'],
+    },
+    {
+      type: 'single-select',
+      question: 'What does success mean to you?',
+      options: [
+        'financial independence',
+        'doing work I love',
+        'strong relationships',
+        'freedom and flexibility',
+        'making an impact',
+        'a mix of everything',
+      ],
+      memoryTags: ['#success-definition'],
+    },
+    {
+      type: 'binary-choice',
+      question: 'Do you set formal goals?',
+      memoryTags: ['#sets-formal-goals'],
+      skipRules: [{ values: ['no'], targetIndex: 8 }],
+    },
+    {
+      type: 'single-select',
+      question: 'How do you track them?',
+      options: [
+        'written goals / journal', 'app or spreadsheet',
+        'vision board', 'accountability partner',
+        'just in my head', 'OKRs / formal framework',
+      ],
+      memoryTags: ['#goal-tracking-method'],
+      isSubScreen: true,
+    },
+    {
+      type: 'text-input',
+      question: "What's holding you back?",
+      placeholder: 'Time, money, fear of failure, not knowing where to start',
+      memoryTags: ['#obstacles'],
+    },
+  ],
+}
+
 // ─── Export All Flows ─────────────────────────────────────────────
 export const allFlows: Flow[] = [
   aboutYou,
@@ -1261,4 +1351,5 @@ export const allFlows: Flow[] = [
   digitalLife,
   yourSpace,
   importantStuff,
+  yourGoals,
 ]
