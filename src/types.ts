@@ -38,6 +38,7 @@ export interface FlowScreen {
   max?: number
   step?: number
   images?: string[]
+  maxLength?: number
 }
 
 export interface Flow {
