@@ -37,6 +37,21 @@ function clearFlowState(flowId: string) {
   localStorage.removeItem(STORAGE_PREFIX + flowId)
 }
 
+const COMPLETED_KEY = 'weave-completed-flows'
+
+function markFlowCompleted(flowId: string) {
+  try {
+    const raw = localStorage.getItem(COMPLETED_KEY)
+    const ids: string[] = raw ? JSON.parse(raw) : []
+    if (!ids.includes(flowId)) {
+      ids.push(flowId)
+      localStorage.setItem(COMPLETED_KEY, JSON.stringify(ids))
+    }
+  } catch {
+    // Silently fail
+  }
+}
+
 export default function FlowEngine({
   flow,
   onExit,
@@ -91,6 +106,7 @@ export default function FlowEngine({
       setAnimKey((k) => k + 1)
       if (targetIndex >= flow.screens.length) {
         clearFlowState(flow.id)
+        markFlowCompleted(flow.id)
         setCompleted(true)
       } else {
         setCurrentIndex(targetIndex)

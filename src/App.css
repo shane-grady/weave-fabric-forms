@@ -758,6 +758,27 @@ body {
   flex-shrink: 0;
 }
 
+.flow-card--done {
+  opacity: 0.75;
+}
+
+.flow-card-check {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.flow-card-check svg {
+  width: 16px;
+  height: 16px;
+  color: var(--text-primary);
+}
+
 /* ============================================
    Completion Screen
    ============================================ */
