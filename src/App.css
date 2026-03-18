@@ -134,13 +134,31 @@ body {
   height: 100%;
   display: flex;
   flex-direction: column;
-  animation: screenIn 0.3s ease-out;
 }
 
-@keyframes screenIn {
+.screen--forward {
+  animation: slideInRight 0.25s ease-out;
+}
+
+.screen--back {
+  animation: slideInLeft 0.25s ease-out;
+}
+
+@keyframes slideInRight {
   from {
     opacity: 0;
     transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
   }
   to {
     opacity: 1;

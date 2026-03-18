@@ -94,6 +94,7 @@ export default function FlowEngine({
   const [answers, setAnswers] = useState<Record<number, Answer>>(saved?.answers ?? {})
   const [completed, setCompleted] = useState(false)
   const [animKey, setAnimKey] = useState(0)
+  const [direction, setDirection] = useState<'forward' | 'back'>('forward')
 
   useEffect(() => {
     if (!completed) {
@@ -133,6 +134,7 @@ export default function FlowEngine({
 
   const navigate = useCallback(
     (targetIndex: number) => {
+      setDirection('forward')
       setAnimKey((k) => k + 1)
       if (targetIndex >= flow.screens.length) {
         clearFlowState(flow.id)
@@ -182,6 +184,7 @@ export default function FlowEngine({
       onExit()
       return
     }
+    setDirection('back')
     setAnimKey((k) => k + 1)
     setCurrentIndex((prev) => Math.max(0, prev - 1))
   }, [currentIndex, onExit])
@@ -262,7 +265,7 @@ export default function FlowEngine({
     <div className="app">
       <NavBar title={flow.category} onBack={handleBack} />
       <div className="screen-card" key={animKey}>
-        <div className="screen" ref={screenRef} style={{ animation: 'screenIn 0.25s ease-out' }}>
+        <div className={`screen screen--${direction}`} ref={screenRef}>
           <ProgressBar current={mainStep} total={totalMain} />
           <div className="screen-content">
             <ScreenRenderer
