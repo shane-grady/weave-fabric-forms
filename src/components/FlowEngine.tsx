@@ -19,6 +19,73 @@ const RankingScreen = lazy(() => import('./screens/RankingScreen'))
 const TagInputScreen = lazy(() => import('./screens/TagInputScreen'))
 const ImageSelectScreen = lazy(() => import('./screens/ImageSelectScreen'))
 
+const STORAGE_PREFIX = 'weave-flow-'
+
+interface SavedFlowState {
+  answers: Record<number, Answer>
+  currentIndex: number
+}
+
+function loadFlowState(flowId: string): SavedFlowState | null {
+  try {
+    const raw = localStorage.getItem(STORAGE_PREFIX + flowId)
+    return raw ? JSON.parse(raw) : null
+  } catch {
+    return null
+  }
+}
+
+function saveFlowState(flowId: string, state: SavedFlowState) {
+  try {
+    localStorage.setItem(STORAGE_PREFIX + flowId, JSON.stringify(state))
+  } catch {
+    // Storage full — silently fail
+  }
+}
+
+function clearFlowState(flowId: string) {
+  localStorage.removeItem(STORAGE_PREFIX + flowId)
+}
+
+const COMPLETED_KEY = 'weave-completed-flows'
+
+function markFlowCompleted(flowId: string) {
+  try {
+    const raw = localStorage.getItem(COMPLETED_KEY)
+    const ids: string[] = raw ? JSON.parse(raw) : []
+    if (!ids.includes(flowId)) {
+      ids.push(flowId)
+      localStorage.setItem(COMPLETED_KEY, JSON.stringify(ids))
+    }
+  } catch {
+    // Silently fail
+  }
+}
+
+function isAnswerValid(type: import('../types').ScreenType, answer: Answer): boolean {
+  switch (type) {
+    case 'intro':
+    case 'number-stepper':
+    case 'slider':
+    case 'ranking':
+    case 'image-select':
+      return true
+    case 'text-input':
+      return typeof answer === 'string' && answer.trim().length > 0
+    case 'multi-input':
+      return Array.isArray(answer) && answer.some((v) => typeof v === 'string' && v.trim().length > 0)
+    case 'multi-select':
+    case 'checkbox':
+    case 'tag-input':
+      return Array.isArray(answer) && answer.length > 0
+    case 'single-select':
+    case 'binary-choice':
+      return answer != null && answer !== ''
+    case 'date-picker':
+      return typeof answer === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(answer)
+  }
+}
+
 export default function FlowEngine({
   flow,
   onExit,
