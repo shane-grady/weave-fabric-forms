@@ -14,6 +14,9 @@ import SliderScreen from './screens/SliderScreen'
 import RankingScreen from './screens/RankingScreen'
 import TagInputScreen from './screens/TagInputScreen'
 import ImageSelectScreen from './screens/ImageSelectScreen'
+import NavBar from './NavBar'
+import ProgressBar from './ProgressBar'
+import BottomNav from './BottomNav'
 
 const STORAGE_PREFIX = 'weave-flow-'
 
@@ -319,90 +322,6 @@ export default function FlowEngine({
           Undo
         </button>
       )}
-    </div>
-  )
-}
-
-function NavBar({
-  title,
-  onBack,
-}: {
-  title: string
-  onBack: () => void
-}) {
-  return (
-    <div className="nav-bar">
-      <button className="nav-back" onClick={onBack} type="button">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <polyline points="15 18 9 12 15 6" />
-        </svg>
-      </button>
-      <span className="nav-title">{title}</span>
-    </div>
-  )
-}
-
-function ProgressBar({
-  current,
-  total,
-}: {
-  current: number
-  total: number
-}) {
-  return (
-    <div className="progress-bar">
-      <div className="progress-segments">
-        {Array.from({ length: total }, (_, i) => (
-          <div
-            key={i}
-            className={`progress-segment ${
-              i < current ? 'progress-segment--filled' : 'progress-segment--empty'
-            }`}
-          />
-        ))}
-      </div>
-      <span className="progress-label">
-        {current}/{total}
-      </span>
-    </div>
-  )
-}
-
-function BottomNav({
-  showSkip,
-  disabled,
-  onDone,
-  onSkip,
-  onNext,
-}: {
-  showSkip: boolean
-  disabled: boolean
-  onDone: () => void
-  onSkip: () => void
-  onNext: () => void
-}) {
-  return (
-    <div className="bottom-nav">
-      <button className="btn btn-done" onClick={onDone} type="button">
-        Done
-      </button>
-      {showSkip && (
-        <button className="btn btn-skip" onClick={onSkip} type="button">
-          Skip
-        </button>
-      )}
-      <button
-        className={`btn btn-next ${disabled ? 'btn-next--disabled' : ''}`}
-        onClick={disabled ? undefined : onNext}
-        type="button"
-        aria-disabled={disabled}
-      >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <line x1="5" y1="12" x2="19" y2="12" />
-          <polyline points="12 5 19 12 12 19" />
-        </svg>
-        Next
-      </button>
     </div>
   )
 }
