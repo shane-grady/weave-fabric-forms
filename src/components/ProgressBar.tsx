@@ -27,6 +27,7 @@ export default function ProgressBar({
       <span className="progress-label">
         {current}/{total}
       </span>
+      <span className="sr-only">Step {current} of {total}</span>
     </div>
   )
 }
