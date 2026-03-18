@@ -206,6 +206,19 @@
   .branch-item--active { color: var(--green); }
   .branch-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-muted); flex-shrink: 0; }
   .branch-item--active .branch-dot { background: var(--green); }
+
+  /* Repo tags */
+  .repo-tag {
+    font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 99px;
+    text-transform: uppercase; letter-spacing: 0.3px; white-space: nowrap;
+  }
+  .repo-section-title {
+    font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+    padding: 8px 12px 4px; color: var(--text-dim);
+  }
+  .branch-repo-label {
+    font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 4px; margin-left: auto;
+  }
 </style>
 </head>
 <body>
@@ -219,7 +232,10 @@
 <script>
 // ── Config ──────────────────────────────────────────────
 const OWNER = 'shane-grady';
-const REPO = 'weave-fabric-forms';
+const REPOS = [
+  { name: 'weave-fabric-forms', label: 'Forms', color: '#EF3B3B' },
+  { name: 'weave-fabric-sms', label: 'SMS', color: '#3b82f6' },
+];
 const API = 'https://api.github.com';
 const POLL_INTERVAL = 60_000; // 60s (GitHub API rate-friendly)
 const COMMITS_PER_PAGE = 100;
@@ -228,11 +244,10 @@ let lastData = null;
 let lastCommitCount = 0;
 let rateLimitRemaining = null;
 let rateLimitReset = null;
-let defaultBranch = 'main';
 
 // ── GitHub API helpers ──────────────────────────────────
-async function ghFetch(path, opts = {}) {
-  const url = path.startsWith('http') ? path : `${API}/repos/${OWNER}/${REPO}${path}`;
+async function ghFetch(repoName, path, opts = {}) {
+  const url = path.startsWith('http') ? path : `${API}/repos/${OWNER}/${repoName}${path}`;
   const res = await fetch(url, {
     headers: { 'Accept': 'application/vnd.github.v3+json', ...opts.headers },
     ...opts,
@@ -243,23 +258,23 @@ async function ghFetch(path, opts = {}) {
   return res;
 }
 
-async function fetchAllBranchCommits() {
-  // Fetch branches first
-  const branchRes = await ghFetch('/branches?per_page=100');
+async function fetchRepoData(repo) {
+  // Fetch branches
+  const branchRes = await ghFetch(repo.name, '/branches?per_page=100');
   const branches = await branchRes.json();
 
   // Fetch commits from all branches in parallel
   const commitPromises = branches.map(async (b) => {
     try {
-      const res = await ghFetch(`/commits?sha=${encodeURIComponent(b.name)}&per_page=${COMMITS_PER_PAGE}`);
+      const res = await ghFetch(repo.name, `/commits?sha=${encodeURIComponent(b.name)}&per_page=${COMMITS_PER_PAGE}`);
       const commits = await res.json();
-      return commits.map(c => ({ ...c, _branch: b.name }));
+      return commits.map(c => ({ ...c, _branch: b.name, _repo: repo.name, _repoLabel: repo.label, _repoColor: repo.color }));
     } catch { return []; }
   });
 
   const allBranchCommits = await Promise.all(commitPromises);
 
-  // Dedupe by SHA, keep earliest branch association
+  // Dedupe by SHA
   const seen = new Map();
   for (const branchCommits of allBranchCommits) {
     for (const c of branchCommits) {
@@ -267,34 +282,37 @@ async function fetchAllBranchCommits() {
     }
   }
 
-  // Sort by date descending
-  const commits = [...seen.values()].sort((a, b) => {
-    const da = new Date(a.commit.author.date);
-    const db = new Date(b.commit.author.date);
-    return db - da;
+  return {
+    commits: [...seen.values()],
+    branches: branches.map(b => ({ name: b.name, repo: repo.name, repoLabel: repo.label })),
+  };
+}
+
+async function fetchAllRepos() {
+  const results = await Promise.all(REPOS.map(r => fetchRepoData(r).catch(() => ({ commits: [], branches: [] }))));
+
+  const allCommits = results.flatMap(r => r.commits).sort((a, b) => {
+    return new Date(b.commit.author.date) - new Date(a.commit.author.date);
   });
 
-  return { commits, branches };
+  const allBranches = results.flatMap(r => r.branches);
+  return { commits: allCommits, branches: allBranches };
 }
 
 async function fetchLoopPrompts() {
-  // Try fetching loop-prompts.md from the default branch
-  try {
-    const res = await ghFetch(`/contents/loop-prompts.md?ref=${defaultBranch}`);
-    const data = await res.json();
-    return atob(data.content);
-  } catch {
-    // Try main, then master
+  // Try fetching from each repo
+  const allPrompts = {};
+  for (const repo of REPOS) {
     for (const branch of ['main', 'master']) {
       try {
-        const res = await ghFetch(`/contents/loop-prompts.md?ref=${branch}`);
+        const res = await ghFetch(repo.name, `/contents/loop-prompts.md?ref=${branch}`);
         const data = await res.json();
-        defaultBranch = branch;
-        return atob(data.content);
+        allPrompts[repo.name] = { text: atob(data.content), label: repo.label };
+        break;
       } catch { continue; }
     }
-    return null;
   }
+  return allPrompts;
 }
 
 // ── Data processing ─────────────────────────────────────
@@ -358,11 +376,9 @@ function parseBacklog(loopPromptsText, commitMessages) {
   return sections;
 }
 
-function processData(commits, branches, loopPromptsText) {
-  const commitMessages = commits.map(c => c.commit.message.toLowerCase());
-
+function processData(commits, branches, loopPromptsMap) {
   const enriched = commits.map(c => {
-    const msg = c.commit.message.split('\n')[0]; // first line only
+    const msg = c.commit.message.split('\n')[0];
     const cat = categorizeCommit(msg);
     return {
       sha: c.sha,
@@ -371,34 +387,51 @@ function processData(commits, branches, loopPromptsText) {
       author: c.commit.author.name,
       date: c.commit.author.date,
       branch: c._branch || '',
+      repo: c._repo || '',
+      repoLabel: c._repoLabel || '',
+      repoColor: c._repoColor || '#9ca3af',
       url: c.html_url,
       agent: cat.agent,
       color: cat.color,
     };
   });
 
-  // Stats
   const now = new Date();
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const oneHourAgo = new Date(now - 3600000);
   const commitsToday = enriched.filter(c => new Date(c.date) >= todayStart).length;
   const commitsLastHour = enriched.filter(c => new Date(c.date) >= oneHourAgo).length;
 
-  // Agent activity
+  // Per-repo stats
+  const repoStats = {};
+  for (const repo of REPOS) {
+    const repoCommits = enriched.filter(c => c.repo === repo.name);
+    repoStats[repo.name] = { label: repo.label, color: repo.color, count: repoCommits.length };
+  }
+
   const agentActivity = {};
   for (const c of enriched) {
     if (!agentActivity[c.agent]) agentActivity[c.agent] = { count: 0, color: c.color, lastActive: c.date };
     agentActivity[c.agent].count++;
   }
 
-  const backlog = parseBacklog(loopPromptsText, commitMessages);
+  // Parse backlogs from all repos that have loop-prompts.md
+  const allBacklog = [];
+  const commitMessages = enriched.map(c => c.message.toLowerCase());
+  for (const [repoName, { text, label }] of Object.entries(loopPromptsMap)) {
+    const sections = parseBacklog(text, commitMessages);
+    if (sections.length > 0) {
+      allBacklog.push({ repoName, repoLabel: label, sections });
+    }
+  }
 
   return {
     generatedAt: now.toISOString(),
-    branches: branches.map(b => ({ name: b.name, isDefault: b.name === defaultBranch })),
-    stats: { totalCommits: enriched.length, commitsToday, commitsLastHour },
+    branches,
+    repoStats,
+    stats: { totalCommits: enriched.length, commitsToday, commitsLastHour, repos: REPOS.length },
     commits: enriched,
-    backlog,
+    backlog: allBacklog,
     agentActivity,
   };
 }
@@ -463,12 +496,14 @@ function render(data) {
   lastCommitCount = data.commits.length;
 
   const agents = Object.entries(data.agentActivity).sort((a, b) => b[1].count - a[1].count);
-  const totalItems = data.backlog.reduce((s, sec) => s + sec.items.length, 0);
-  const doneItems = data.backlog.reduce((s, sec) => s + sec.items.filter(i => i.completed).length, 0);
+  const totalItems = data.backlog.reduce((s, rb) => s + rb.sections.reduce((s2, sec) => s2 + sec.items.length, 0), 0);
+  const doneItems = data.backlog.reduce((s, rb) => s + rb.sections.reduce((s2, sec) => s2 + sec.items.filter(i => i.completed).length, 0), 0);
   const progress = totalItems > 0 ? Math.round((doneItems / totalItems) * 100) : 0;
   const el = elapsed(data.commits);
   const dayGroups = groupByDay(data.commits.slice(0, 60));
   const rateStr = rateLimitRemaining !== null ? `${rateLimitRemaining} req left` : '';
+
+  const repoStatsArr = Object.values(data.repoStats);
 
   document.getElementById('app').innerHTML = `
     <div class="header">
@@ -476,11 +511,11 @@ function render(data) {
         <div class="logo">W</div>
         <div>
           <div class="header-title">Agent Dashboard</div>
-          <div class="header-subtitle">${OWNER}/${REPO} — Live from GitHub API</div>
+          <div class="header-subtitle">${OWNER} — ${REPOS.length} repos · Live from GitHub API</div>
         </div>
       </div>
       <div class="header-right">
-        <span class="branch-tag"><span class="branch-icon">⎇</span> ${data.branches.length} branches</span>
+        ${REPOS.map(r => `<span class="repo-tag" style="background:${r.color}22;color:${r.color}">${r.label}</span>`).join('')}
         <div class="live-dot"></div>
         <span class="live-label">Live</span>
         <span class="refresh-info">↻ ${formatTime(data.generatedAt)}</span>
@@ -492,7 +527,7 @@ function render(data) {
       <div class="stat-card">
         <div class="stat-label">Total Commits</div>
         <div class="stat-value">${data.stats.totalCommits}</div>
-        <div class="stat-sub">across all branches</div>
+        <div class="stat-sub">${repoStatsArr.map(r => `${r.label}: ${r.count}`).join(' · ')}</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">Today</div>
@@ -505,9 +540,9 @@ function render(data) {
         <div class="stat-sub">commits in the last 60 min</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">Backlog</div>
-        <div class="stat-value">${progress}%</div>
-        <div class="stat-sub">${doneItems} of ${totalItems} items</div>
+        <div class="stat-label">Repos</div>
+        <div class="stat-value">${REPOS.length}</div>
+        <div class="stat-sub">${REPOS.map(r => r.label).join(' + ')}</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">Agents</div>
@@ -546,6 +581,7 @@ function render(data) {
                     </a>
                     <div class="commit-meta">
                       <span class="commit-hash">${c.short}</span>
+                      <span class="repo-tag" style="background:${c.repoColor}22;color:${c.repoColor}">${escapeHtml(c.repoLabel)}</span>
                       <span class="commit-agent" style="background:${c.color}22;color:${c.color}">${escapeHtml(c.agent)}</span>
                       <span class="commit-time">${formatTime(c.date)} · ${timeAgo(c.date)}</span>
                     </div>
@@ -582,14 +618,21 @@ function render(data) {
             <span class="panel-badge">${data.branches.length}</span>
           </div>
           <div class="panel-body">
-            <div class="branch-list">
-              ${data.branches.map(b => `
-                <div class="branch-item ${b.isDefault ? 'branch-item--active' : ''}">
-                  <div class="branch-dot"></div>
-                  <span>${escapeHtml(b.name)}</span>
+            ${REPOS.map(repo => {
+              const repoBranches = data.branches.filter(b => b.repo === repo.name);
+              if (!repoBranches.length) return '';
+              return `
+                <div class="repo-section-title" style="color:${repo.color}">${repo.label}</div>
+                <div class="branch-list">
+                  ${repoBranches.map(b => `
+                    <div class="branch-item ${b.name === 'main' ? 'branch-item--active' : ''}">
+                      <div class="branch-dot"></div>
+                      <span>${escapeHtml(b.name)}</span>
+                    </div>
+                  `).join('')}
                 </div>
-              `).join('')}
-            </div>
+              `;
+            }).join('')}
           </div>
         </div>
 
@@ -599,32 +642,37 @@ function render(data) {
             <span class="panel-badge">${progress}%</span>
           </div>
           <div class="panel-body">
-            ${data.backlog.map(section => {
-              const done = section.items.filter(i => i.completed).length;
-              const total = section.items.length;
-              const pct = total > 0 ? Math.round((done / total) * 100) : 0;
-              const colors = ['#EF3B3B', '#3b82f6', '#a78bfa', '#eab308'];
-              const barColor = colors[(section.number - 1) % colors.length];
+            ${data.backlog.map(repoBacklog => {
+              const repoConf = REPOS.find(r => r.name === repoBacklog.repoName);
+              const repoColor = repoConf ? repoConf.color : '#9ca3af';
               return `
-                <div class="backlog-section">
-                  <div class="backlog-header">
-                    <span class="backlog-title">S${section.number}: ${escapeHtml(section.title)}</span>
-                    <span class="backlog-count">${done}/${total}</span>
-                  </div>
-                  <div class="backlog-bar">
-                    <div class="backlog-bar-fill" style="width:${pct}%;background:${barColor}"></div>
-                  </div>
-                  <div class="backlog-items">
-                    ${section.items.map(item => `
-                      <div class="backlog-item ${item.completed ? 'backlog-item--done' : ''}">
-                        <div class="backlog-check ${item.completed ? 'backlog-check--done' : 'backlog-check--pending'}">
-                          ${item.completed ? '✓' : '·'}
-                        </div>
-                        <span class="backlog-item-name">${escapeHtml(item.name)}</span>
+                <div class="repo-section-title" style="color:${repoColor}">${escapeHtml(repoBacklog.repoLabel)}</div>
+                ${repoBacklog.sections.map(section => {
+                  const done = section.items.filter(i => i.completed).length;
+                  const total = section.items.length;
+                  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+                  return `
+                    <div class="backlog-section">
+                      <div class="backlog-header">
+                        <span class="backlog-title">S${section.number}: ${escapeHtml(section.title)}</span>
+                        <span class="backlog-count">${done}/${total}</span>
                       </div>
-                    `).join('')}
-                  </div>
-                </div>
+                      <div class="backlog-bar">
+                        <div class="backlog-bar-fill" style="width:${pct}%;background:${repoColor}"></div>
+                      </div>
+                      <div class="backlog-items">
+                        ${section.items.map(item => `
+                          <div class="backlog-item ${item.completed ? 'backlog-item--done' : ''}">
+                            <div class="backlog-check ${item.completed ? 'backlog-check--done' : 'backlog-check--pending'}">
+                              ${item.completed ? '✓' : '·'}
+                            </div>
+                            <span class="backlog-item-name">${escapeHtml(item.name)}</span>
+                          </div>
+                        `).join('')}
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
               `;
             }).join('')}
             ${data.backlog.length === 0 ? '<div class="empty-state">No backlog data found.</div>' : ''}
@@ -638,11 +686,11 @@ function render(data) {
 // ── Fetch & poll ────────────────────────────────────────
 async function refresh() {
   try {
-    const [{ commits, branches }, loopPrompts] = await Promise.all([
-      fetchAllBranchCommits(),
+    const [{ commits, branches }, loopPromptsMap] = await Promise.all([
+      fetchAllRepos(),
       fetchLoopPrompts(),
     ]);
-    const data = processData(commits, branches, loopPrompts);
+    const data = processData(commits, branches, loopPromptsMap);
     lastData = data;
     render(data);
   } catch (err) {
