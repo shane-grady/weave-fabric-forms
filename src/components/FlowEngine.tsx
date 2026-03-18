@@ -13,6 +13,7 @@ import DatePickerScreen from './screens/DatePickerScreen'
 import SliderScreen from './screens/SliderScreen'
 import RankingScreen from './screens/RankingScreen'
 import TagInputScreen from './screens/TagInputScreen'
+import ImageSelectScreen from './screens/ImageSelectScreen'
 
 const STORAGE_PREFIX = 'weave-flow-'
 
@@ -71,6 +72,7 @@ function isAnswerValid(type: import('../types').ScreenType, answer: Answer): boo
     case 'multi-select':
     case 'checkbox':
     case 'tag-input':
+    case 'image-select':
       return Array.isArray(answer) && answer.length > 0
     case 'single-select':
     case 'binary-choice':
@@ -403,5 +405,7 @@ function ScreenRenderer({
       return <RankingScreen screen={screen} value={value} onChange={onChange} />
     case 'tag-input':
       return <TagInputScreen screen={screen} value={value} onChange={onChange} />
+    case 'image-select':
+      return <ImageSelectScreen screen={screen} value={value} onChange={onChange} />
   }
 }

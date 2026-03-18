@@ -945,6 +945,95 @@ body {
 }
 
 /* ============================================
+   Image Select
+   ============================================ */
+
+.image-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.image-card {
+  background: var(--chip);
+  border-radius: 20px;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: var(--font);
+  color: var(--text-primary);
+  text-align: center;
+  overflow: hidden;
+  transition: transform 0.1s, outline-color 0.2s;
+  outline: 3px solid transparent;
+  outline-offset: -3px;
+  user-select: none;
+}
+
+.image-card:active {
+  transform: scale(0.96);
+}
+
+.image-card--selected {
+  outline-color: rgba(255, 255, 255, 0.5);
+  background: var(--chip-selected);
+}
+
+.image-card-visual {
+  width: 100%;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background: rgba(255, 225, 215, 0.1);
+}
+
+.image-card--selected .image-card-visual {
+  background: rgba(155, 32, 32, 0.12);
+}
+
+.image-card-emoji {
+  font-size: 44px;
+}
+
+.image-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.image-card-check {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--chip-selected-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-card-check svg {
+  width: 16px;
+  height: 16px;
+  color: #FFFFFF;
+}
+
+.image-card-label {
+  display: block;
+  padding: 12px 8px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.image-card--selected .image-card-label {
+  color: var(--chip-selected-text);
+}
+
+/* ============================================
    Flow List (Landing Page)
    ============================================ */
 
