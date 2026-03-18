@@ -8,6 +8,7 @@ export type ScreenType =
   | 'checkbox'
   | 'number-stepper'
   | 'date-picker'
+  | 'slider'
 
 export interface Field {
   label: string
@@ -30,6 +31,9 @@ export interface FlowScreen {
   introCopy?: string
   isSubScreen?: boolean
   skipRules?: SkipRule[]
+  min?: number
+  max?: number
+  step?: number
 }
 
 export interface Flow {

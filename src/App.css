@@ -695,6 +695,86 @@ body {
 }
 
 /* ============================================
+   Slider
+   ============================================ */
+
+.slider-value {
+  text-align: center;
+  font-size: 56px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 32px 0 40px;
+  letter-spacing: -1px;
+}
+
+.slider-track-wrap {
+  padding: 0 4px;
+}
+
+.slider-input {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  background: linear-gradient(
+    to right,
+    var(--progress-filled) 0%,
+    var(--progress-filled) var(--slider-pct, 50%),
+    var(--progress-unfilled) var(--slider-pct, 50%),
+    var(--progress-unfilled) 100%
+  );
+  outline: none;
+  cursor: pointer;
+}
+
+.slider-input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--chip-selected);
+  border: 4px solid var(--chip-selected-text);
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.slider-input::-webkit-slider-thumb:active {
+  transform: scale(1.15);
+}
+
+.slider-input::-moz-range-thumb {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--chip-selected);
+  border: 4px solid var(--chip-selected-text);
+  cursor: pointer;
+}
+
+.slider-input::-moz-range-track {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--progress-unfilled);
+}
+
+.slider-input::-moz-range-progress {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--progress-filled);
+}
+
+.slider-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+/* ============================================
    Flow List (Landing Page)
    ============================================ */
 
