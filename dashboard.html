@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weave Fabric — Agent Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --surface-2: #1a1a26;
+    --surface-3: #22222e;
+    --border: rgba(255,255,255,0.06);
+    --text: #e4e4e7;
+    --text-dim: #71717a;
+    --text-muted: #52525b;
+    --accent: #EF3B3B;
+    --accent-dim: rgba(239,59,59,0.15);
+    --green: #22c55e;
+    --green-dim: rgba(34,197,94,0.12);
+    --yellow: #eab308;
+    --yellow-dim: rgba(234,179,8,0.12);
+    --blue: #3b82f6;
+    --blue-dim: rgba(59,130,246,0.12);
+    --font: 'Inter', -apple-system, sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { height: 100%; }
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100%;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .dashboard { max-width: 1400px; margin: 0 auto; padding: 24px; }
+
+  /* Header */
+  .header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 32px; padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .header-left { display: flex; align-items: center; gap: 16px; }
+  .logo {
+    width: 40px; height: 40px; background: var(--accent); border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; font-weight: 800; color: white;
+  }
+  .header-title { font-size: 22px; font-weight: 700; letter-spacing: -0.3px; }
+  .header-subtitle { font-size: 13px; color: var(--text-dim); margin-top: 2px; }
+  .header-right { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; justify-content: flex-end; }
+  .live-dot {
+    width: 8px; height: 8px; background: var(--green); border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(34,197,94,0.4); }
+    50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(34,197,94,0); }
+  }
+  .live-label { font-size: 13px; color: var(--green); font-weight: 500; }
+  .refresh-info { font-size: 12px; color: var(--text-muted); font-family: var(--mono); }
+  .rate-info { font-size: 11px; color: var(--text-muted); font-family: var(--mono); }
+
+  /* Stats */
+  .stats-row {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px; margin-bottom: 24px;
+  }
+  .stat-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 18px 20px;
+  }
+  .stat-label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin-bottom: 6px; }
+  .stat-value { font-size: 32px; font-weight: 800; letter-spacing: -1px; }
+  .stat-sub { font-size: 12px; color: var(--text-dim); margin-top: 4px; }
+
+  /* Grid */
+  .main-grid { display: grid; grid-template-columns: 1fr 380px; gap: 20px; }
+  @media (max-width: 960px) { .main-grid { grid-template-columns: 1fr; } }
+
+  /* Panel */
+  .panel {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; overflow: hidden;
+  }
+  .panel-header {
+    padding: 16px 20px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .panel-title { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+  .panel-badge {
+    font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 99px;
+    background: var(--accent-dim); color: var(--accent);
+  }
+  .panel-body { padding: 12px; max-height: 600px; overflow-y: auto; }
+  .panel-body::-webkit-scrollbar { width: 4px; }
+  .panel-body::-webkit-scrollbar-track { background: transparent; }
+  .panel-body::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 2px; }
+
+  /* Commits */
+  .commit {
+    display: flex; gap: 12px; padding: 10px 8px;
+    border-radius: 8px; transition: background 0.15s; position: relative;
+  }
+  .commit:hover { background: var(--surface-2); }
+  .commit-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+  .commit-line {
+    position: absolute; left: 12.5px; top: 20px; bottom: -6px;
+    width: 1px; background: var(--border);
+  }
+  .commit:last-child .commit-line { display: none; }
+  .commit-content { flex: 1; min-width: 0; }
+  .commit-msg { font-size: 13px; font-weight: 500; line-height: 1.4; margin-bottom: 4px; word-break: break-word; }
+  .commit-meta {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 11px; color: var(--text-muted); font-family: var(--mono);
+  }
+  .commit-hash { color: var(--text-dim); }
+  .commit-agent {
+    font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 99px;
+    text-transform: uppercase; letter-spacing: 0.3px;
+  }
+  .commit-time { color: var(--text-muted); }
+  .commit-new { animation: fadeIn 0.5s ease-out; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Day headers */
+  .day-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 8px 4px; margin-top: 4px;
+    position: sticky; top: 0; z-index: 2; background: var(--surface);
+  }
+  .day-header:first-child { margin-top: 0; }
+  .day-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-dim); white-space: nowrap; }
+  .day-line { flex: 1; height: 1px; background: var(--border); }
+  .day-count { font-size: 10px; font-family: var(--mono); color: var(--text-muted); white-space: nowrap; }
+
+  /* Agents */
+  .agents-grid { display: flex; flex-direction: column; gap: 6px; }
+  .agent-card {
+    display: flex; align-items: center; gap: 12px; padding: 10px 12px;
+    border-radius: 8px; transition: background 0.15s;
+  }
+  .agent-card:hover { background: var(--surface-2); }
+  .agent-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .agent-name { font-size: 13px; font-weight: 600; flex: 1; }
+  .agent-count { font-size: 12px; font-weight: 700; font-family: var(--mono); color: var(--text-dim); }
+
+  /* Backlog */
+  .backlog-section { margin-bottom: 16px; padding: 12px; background: var(--surface-2); border-radius: 10px; }
+  .backlog-section:last-child { margin-bottom: 0; }
+  .backlog-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .backlog-title { font-size: 13px; font-weight: 700; }
+  .backlog-count { font-size: 12px; font-family: var(--mono); color: var(--text-dim); }
+  .backlog-bar { height: 6px; background: var(--surface-3); border-radius: 3px; overflow: hidden; margin-bottom: 10px; }
+  .backlog-bar-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
+  .backlog-items { display: flex; flex-direction: column; gap: 4px; }
+  .backlog-item { display: flex; align-items: center; gap: 8px; font-size: 12px; padding: 4px 0; }
+  .backlog-check {
+    width: 16px; height: 16px; border-radius: 4px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 10px;
+  }
+  .backlog-check--done { background: var(--green-dim); color: var(--green); }
+  .backlog-check--pending { background: var(--surface-3); color: var(--text-muted); }
+  .backlog-item-name { color: var(--text-dim); }
+  .backlog-item--done .backlog-item-name { color: var(--green); text-decoration: line-through; text-decoration-color: rgba(34,197,94,0.3); }
+
+  /* Branch */
+  .branch-tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; font-family: var(--mono);
+    background: var(--surface-2); border: 1px solid var(--border);
+    padding: 4px 12px; border-radius: 6px; color: var(--text-dim);
+  }
+  .branch-icon { color: var(--accent); }
+
+  /* Elapsed */
+  .elapsed-value { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; font-family: var(--mono); }
+  .elapsed-value--active { color: var(--green); }
+  .elapsed-value--idle { color: var(--yellow); }
+  .elapsed-value--stale { color: var(--accent); }
+
+  /* Loading */
+  .loading { display: flex; align-items: center; justify-content: center; min-height: 400px; flex-direction: column; gap: 16px; }
+  .spinner { width: 32px; height: 32px; border: 3px solid var(--surface-3); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { font-size: 13px; color: var(--text-muted); }
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--text-muted); font-size: 13px; }
+
+  /* Branches panel */
+  .branch-list { display: flex; flex-direction: column; gap: 4px; }
+  .branch-item {
+    display: flex; align-items: center; gap: 8px; padding: 6px 10px;
+    border-radius: 6px; font-size: 12px; font-family: var(--mono); color: var(--text-dim);
+  }
+  .branch-item:hover { background: var(--surface-2); }
+  .branch-item--active { color: var(--green); }
+  .branch-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-muted); flex-shrink: 0; }
+  .branch-item--active .branch-dot { background: var(--green); }
+</style>
+</head>
+<body>
+<div class="dashboard" id="app">
+  <div class="loading">
+    <div class="spinner"></div>
+    <div class="loading-text">Fetching from GitHub API...</div>
+  </div>
+</div>
+
+<script>
+// ── Config ──────────────────────────────────────────────
+const OWNER = 'shane-grady';
+const REPO = 'weave-fabric-forms';
+const API = 'https://api.github.com';
+const POLL_INTERVAL = 60_000; // 60s (GitHub API rate-friendly)
+const COMMITS_PER_PAGE = 100;
+
+let lastData = null;
+let lastCommitCount = 0;
+let rateLimitRemaining = null;
+let rateLimitReset = null;
+let defaultBranch = 'main';
+
+// ── GitHub API helpers ──────────────────────────────────
+async function ghFetch(path, opts = {}) {
+  const url = path.startsWith('http') ? path : `${API}/repos/${OWNER}/${REPO}${path}`;
+  const res = await fetch(url, {
+    headers: { 'Accept': 'application/vnd.github.v3+json', ...opts.headers },
+    ...opts,
+  });
+  rateLimitRemaining = res.headers.get('x-ratelimit-remaining');
+  rateLimitReset = res.headers.get('x-ratelimit-reset');
+  if (!res.ok) throw new Error(`GitHub API ${res.status}: ${await res.text()}`);
+  return res;
+}
+
+async function fetchAllBranchCommits() {
+  // Fetch branches first
+  const branchRes = await ghFetch('/branches?per_page=100');
+  const branches = await branchRes.json();
+
+  // Fetch commits from all branches in parallel
+  const commitPromises = branches.map(async (b) => {
+    try {
+      const res = await ghFetch(`/commits?sha=${encodeURIComponent(b.name)}&per_page=${COMMITS_PER_PAGE}`);
+      const commits = await res.json();
+      return commits.map(c => ({ ...c, _branch: b.name }));
+    } catch { return []; }
+  });
+
+  const allBranchCommits = await Promise.all(commitPromises);
+
+  // Dedupe by SHA, keep earliest branch association
+  const seen = new Map();
+  for (const branchCommits of allBranchCommits) {
+    for (const c of branchCommits) {
+      if (!seen.has(c.sha)) seen.set(c.sha, c);
+    }
+  }
+
+  // Sort by date descending
+  const commits = [...seen.values()].sort((a, b) => {
+    const da = new Date(a.commit.author.date);
+    const db = new Date(b.commit.author.date);
+    return db - da;
+  });
+
+  return { commits, branches };
+}
+
+async function fetchLoopPrompts() {
+  // Try fetching loop-prompts.md from the default branch
+  try {
+    const res = await ghFetch(`/contents/loop-prompts.md?ref=${defaultBranch}`);
+    const data = await res.json();
+    return atob(data.content);
+  } catch {
+    // Try main, then master
+    for (const branch of ['main', 'master']) {
+      try {
+        const res = await ghFetch(`/contents/loop-prompts.md?ref=${branch}`);
+        const data = await res.json();
+        defaultBranch = branch;
+        return atob(data.content);
+      } catch { continue; }
+    }
+    return null;
+  }
+}
+
+// ── Data processing ─────────────────────────────────────
+function categorizeCommit(message) {
+  const msg = message.toLowerCase();
+  if (msg.includes('test') || msg.includes('vitest') || msg.includes('spec'))
+    return { agent: 'Testing', color: '#22d3ee' };
+  if (msg.includes('flow') && (msg.includes('add') || msg.includes('new') || msg.includes('create')))
+    return { agent: 'Flow Builder', color: '#a78bfa' };
+  if (msg.includes('screen') || msg.includes('component'))
+    return { agent: 'UI Builder', color: '#f472b6' };
+  if (msg.includes('fix') || msg.includes('bug'))
+    return { agent: 'Bug Fixer', color: '#fb923c' };
+  if (msg.includes('refactor') || msg.includes('extract') || msg.includes('clean'))
+    return { agent: 'Refactorer', color: '#34d399' };
+  if (msg.includes('dashboard'))
+    return { agent: 'Dashboard', color: '#fbbf24' };
+  if (msg.includes('doc') || msg.includes('readme'))
+    return { agent: 'Docs', color: '#94a3b8' };
+  if (msg.includes('style') || msg.includes('css') || msg.includes('animation') || msg.includes('transition'))
+    return { agent: 'Stylist', color: '#e879f9' };
+  if (msg.includes('accessibility') || msg.includes('aria') || msg.includes('a11y'))
+    return { agent: 'Accessibility', color: '#2dd4bf' };
+  if (msg.includes('persist') || msg.includes('localstorage') || msg.includes('storage'))
+    return { agent: 'Storage', color: '#60a5fa' };
+  if (msg.includes('validation') || msg.includes('validate'))
+    return { agent: 'Validation', color: '#f87171' };
+  if (msg.includes('keyboard') || msg.includes('navigation') || msg.includes('swipe'))
+    return { agent: 'Navigation', color: '#c084fc' };
+  return { agent: 'General', color: '#9ca3af' };
+}
+
+function parseBacklog(loopPromptsText, commitMessages) {
+  if (!loopPromptsText) return [];
+  const sections = [];
+  let currentSection = null;
+
+  for (const line of loopPromptsText.split('\n')) {
+    const sectionMatch = line.match(/^## Section (\d+): (.+)/);
+    if (sectionMatch) {
+      currentSection = { number: parseInt(sectionMatch[1]), title: sectionMatch[2].trim(), items: [] };
+      sections.push(currentSection);
+      continue;
+    }
+    if (currentSection) {
+      const itemMatch = line.match(/^\d+\.\s+\*\*(.+?)\*\*\s*[—–-]\s*(.*)/);
+      if (itemMatch) {
+        const name = itemMatch[1].trim();
+        const description = itemMatch[2].trim();
+        const nameLower = name.toLowerCase();
+        const completed = commitMessages.some(msg =>
+          msg.includes(nameLower) ||
+          msg.includes(name.replace(/\s+/g, '-').toLowerCase()) ||
+          (nameLower.split(/\s+/).length <= 3 &&
+           nameLower.split(/\s+/).every(word => word.length > 3 && msg.includes(word)))
+        );
+        currentSection.items.push({ name, description, completed });
+      }
+    }
+  }
+  return sections;
+}
+
+function processData(commits, branches, loopPromptsText) {
+  const commitMessages = commits.map(c => c.commit.message.toLowerCase());
+
+  const enriched = commits.map(c => {
+    const msg = c.commit.message.split('\n')[0]; // first line only
+    const cat = categorizeCommit(msg);
+    return {
+      sha: c.sha,
+      short: c.sha.slice(0, 7),
+      message: msg,
+      author: c.commit.author.name,
+      date: c.commit.author.date,
+      branch: c._branch || '',
+      url: c.html_url,
+      agent: cat.agent,
+      color: cat.color,
+    };
+  });
+
+  // Stats
+  const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const oneHourAgo = new Date(now - 3600000);
+  const commitsToday = enriched.filter(c => new Date(c.date) >= todayStart).length;
+  const commitsLastHour = enriched.filter(c => new Date(c.date) >= oneHourAgo).length;
+
+  // Agent activity
+  const agentActivity = {};
+  for (const c of enriched) {
+    if (!agentActivity[c.agent]) agentActivity[c.agent] = { count: 0, color: c.color, lastActive: c.date };
+    agentActivity[c.agent].count++;
+  }
+
+  const backlog = parseBacklog(loopPromptsText, commitMessages);
+
+  return {
+    generatedAt: now.toISOString(),
+    branches: branches.map(b => ({ name: b.name, isDefault: b.name === defaultBranch })),
+    stats: { totalCommits: enriched.length, commitsToday, commitsLastHour },
+    commits: enriched,
+    backlog,
+    agentActivity,
+  };
+}
+
+// ── Rendering helpers ───────────────────────────────────
+function timeAgo(dateStr) {
+  const seconds = Math.floor((new Date() - new Date(dateStr)) / 1000);
+  if (seconds < 60) return `${seconds}s ago`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  return `${Math.floor(hours / 24)}d ago`;
+}
+
+function formatTime(dateStr) {
+  return new Date(dateStr).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function dayLabel(dateStr) {
+  const d = new Date(dateStr);
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const commitDay = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const diffDays = Math.floor((today - commitDay) / 86400000);
+  if (diffDays === 0) return 'Today';
+  if (diffDays === 1) return 'Yesterday';
+  return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+}
+
+function groupByDay(commits) {
+  const groups = [];
+  let current = null;
+  for (const c of commits) {
+    const label = dayLabel(c.date);
+    if (label !== current) { current = label; groups.push({ label, commits: [c] }); }
+    else groups[groups.length - 1].commits.push(c);
+  }
+  return groups;
+}
+
+function elapsed(commits) {
+  if (!commits.length) return { text: 'No data', cls: 'stale' };
+  const mins = Math.floor((new Date() - new Date(commits[0].date)) / 60000);
+  if (mins < 1) return { text: 'Just now', cls: 'active' };
+  if (mins < 60) return { text: `${mins}m ago`, cls: mins < 15 ? 'active' : 'idle' };
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return { text: `${hrs}h ${mins % 60}m`, cls: 'idle' };
+  return { text: `${Math.floor(hrs / 24)}d`, cls: 'stale' };
+}
+
+// ── Render ──────────────────────────────────────────────
+function render(data) {
+  const isNew = lastCommitCount > 0 && data.commits.length > lastCommitCount;
+  const newCount = isNew ? data.commits.length - lastCommitCount : 0;
+  lastCommitCount = data.commits.length;
+
+  const agents = Object.entries(data.agentActivity).sort((a, b) => b[1].count - a[1].count);
+  const totalItems = data.backlog.reduce((s, sec) => s + sec.items.length, 0);
+  const doneItems = data.backlog.reduce((s, sec) => s + sec.items.filter(i => i.completed).length, 0);
+  const progress = totalItems > 0 ? Math.round((doneItems / totalItems) * 100) : 0;
+  const el = elapsed(data.commits);
+  const dayGroups = groupByDay(data.commits.slice(0, 60));
+  const rateStr = rateLimitRemaining !== null ? `${rateLimitRemaining} req left` : '';
+
+  document.getElementById('app').innerHTML = `
+    <div class="header">
+      <div class="header-left">
+        <div class="logo">W</div>
+        <div>
+          <div class="header-title">Agent Dashboard</div>
+          <div class="header-subtitle">${OWNER}/${REPO} — Live from GitHub API</div>
+        </div>
+      </div>
+      <div class="header-right">
+        <span class="branch-tag"><span class="branch-icon">⎇</span> ${data.branches.length} branches</span>
+        <div class="live-dot"></div>
+        <span class="live-label">Live</span>
+        <span class="refresh-info">↻ ${formatTime(data.generatedAt)}</span>
+        ${rateStr ? `<span class="rate-info">${rateStr}</span>` : ''}
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">Total Commits</div>
+        <div class="stat-value">${data.stats.totalCommits}</div>
+        <div class="stat-sub">across all branches</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Today</div>
+        <div class="stat-value">${data.stats.commitsToday}</div>
+        <div class="stat-sub">commits today</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Last Hour</div>
+        <div class="stat-value">${data.stats.commitsLastHour}</div>
+        <div class="stat-sub">commits in the last 60 min</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Backlog</div>
+        <div class="stat-value">${progress}%</div>
+        <div class="stat-sub">${doneItems} of ${totalItems} items</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Agents</div>
+        <div class="stat-value">${agents.length}</div>
+        <div class="stat-sub">categories detected</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Last Commit</div>
+        <div class="stat-value elapsed-value elapsed-value--${el.cls}">${el.text}</div>
+        <div class="stat-sub">${el.cls === 'active' ? 'agents are active' : el.cls === 'idle' ? 'between cycles' : 'no recent activity'}</div>
+      </div>
+    </div>
+
+    <div class="main-grid">
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">Commit Feed</span>
+          <span class="panel-badge">${data.commits.length} commits</span>
+        </div>
+        <div class="panel-body">
+          ${data.commits.length === 0
+            ? '<div class="empty-state">No commits found.</div>'
+            : dayGroups.map(group => `
+              <div class="day-header">
+                <span class="day-label">${escapeHtml(group.label)}</span>
+                <div class="day-line"></div>
+                <span class="day-count">${group.commits.length}</span>
+              </div>
+              ${group.commits.map((c, i) => `
+                <div class="commit ${i < newCount && group.label === 'Today' ? 'commit-new' : ''}">
+                  <div class="commit-dot" style="background:${c.color}"></div>
+                  <div class="commit-line"></div>
+                  <div class="commit-content">
+                    <a href="${c.url}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit">
+                      <div class="commit-msg">${escapeHtml(c.message)}</div>
+                    </a>
+                    <div class="commit-meta">
+                      <span class="commit-hash">${c.short}</span>
+                      <span class="commit-agent" style="background:${c.color}22;color:${c.color}">${escapeHtml(c.agent)}</span>
+                      <span class="commit-time">${formatTime(c.date)} · ${timeAgo(c.date)}</span>
+                    </div>
+                  </div>
+                </div>
+              `).join('')}
+            `).join('')
+          }
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:20px">
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">Agent Activity</span>
+          </div>
+          <div class="panel-body">
+            <div class="agents-grid">
+              ${agents.map(([name, info]) => `
+                <div class="agent-card">
+                  <div class="agent-dot" style="background:${info.color}"></div>
+                  <span class="agent-name">${escapeHtml(name)}</span>
+                  <span class="agent-count">${info.count}</span>
+                </div>
+              `).join('')}
+              ${agents.length === 0 ? '<div class="empty-state">No activity yet.</div>' : ''}
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">Branches</span>
+            <span class="panel-badge">${data.branches.length}</span>
+          </div>
+          <div class="panel-body">
+            <div class="branch-list">
+              ${data.branches.map(b => `
+                <div class="branch-item ${b.isDefault ? 'branch-item--active' : ''}">
+                  <div class="branch-dot"></div>
+                  <span>${escapeHtml(b.name)}</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" style="flex:1">
+          <div class="panel-header">
+            <span class="panel-title">Backlog Progress</span>
+            <span class="panel-badge">${progress}%</span>
+          </div>
+          <div class="panel-body">
+            ${data.backlog.map(section => {
+              const done = section.items.filter(i => i.completed).length;
+              const total = section.items.length;
+              const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+              const colors = ['#EF3B3B', '#3b82f6', '#a78bfa', '#eab308'];
+              const barColor = colors[(section.number - 1) % colors.length];
+              return `
+                <div class="backlog-section">
+                  <div class="backlog-header">
+                    <span class="backlog-title">S${section.number}: ${escapeHtml(section.title)}</span>
+                    <span class="backlog-count">${done}/${total}</span>
+                  </div>
+                  <div class="backlog-bar">
+                    <div class="backlog-bar-fill" style="width:${pct}%;background:${barColor}"></div>
+                  </div>
+                  <div class="backlog-items">
+                    ${section.items.map(item => `
+                      <div class="backlog-item ${item.completed ? 'backlog-item--done' : ''}">
+                        <div class="backlog-check ${item.completed ? 'backlog-check--done' : 'backlog-check--pending'}">
+                          ${item.completed ? '✓' : '·'}
+                        </div>
+                        <span class="backlog-item-name">${escapeHtml(item.name)}</span>
+                      </div>
+                    `).join('')}
+                  </div>
+                </div>
+              `;
+            }).join('')}
+            ${data.backlog.length === 0 ? '<div class="empty-state">No backlog data found.</div>' : ''}
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ── Fetch & poll ────────────────────────────────────────
+async function refresh() {
+  try {
+    const [{ commits, branches }, loopPrompts] = await Promise.all([
+      fetchAllBranchCommits(),
+      fetchLoopPrompts(),
+    ]);
+    const data = processData(commits, branches, loopPrompts);
+    lastData = data;
+    render(data);
+  } catch (err) {
+    console.error('Dashboard fetch error:', err);
+    if (lastData) {
+      render(lastData);
+    } else {
+      document.getElementById('app').innerHTML = `
+        <div class="loading">
+          <div class="empty-state">
+            <p style="font-size:16px;margin-bottom:8px">Failed to fetch from GitHub API</p>
+            <p style="color:var(--accent);margin-bottom:12px">${escapeHtml(err.message)}</p>
+            <p>This dashboard uses GitHub's public API (no token needed for public repos).</p>
+            <p style="margin-top:8px">If rate-limited, wait a minute and refresh.</p>
+          </div>
+        </div>
+      `;
+    }
+  }
+}
+
+refresh();
+setInterval(refresh, POLL_INTERVAL);
+
+// Live title indicator
+let tick = 0;
+setInterval(() => {
+  tick++;
+  const dot = tick % 2 === 0 ? '●' : '○';
+  document.title = `${dot} Agent Dashboard — Weave Fabric`;
+}, 5000);
+</script>
+</body>
+</html>

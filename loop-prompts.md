@@ -1,309 +1,170 @@
 # Self-Improving Loop Prompts for Weave Fabric Forms
 
-These prompts are designed to run with `/loop` in Claude Code to continuously improve and expand the Weave Fabric Forms project. Each prompt is self-contained and idempotent — Claude will analyze the current state, pick the next improvement, implement it, verify it builds, and commit.
+Automated improvement prompts designed for Claude Code's `/loop` command. Built on 2026 best practices: verification-first design, compaction awareness, narrow scope, and deterministic hooks.
 
 ---
 
-## How to Use
+## Quick Start
 
-Copy any prompt below and run it with `/loop` at your desired interval:
-
+**Run the main improvement loop (recommended):**
 ```
-/loop 30m <paste prompt here>
-```
-
-Or run a one-shot improvement:
-
-```
-<paste prompt here>
+/loop 10m Read CLAUDE.md for project context. Run git log --oneline -30 to see what's already been done. Pick the NEXT unfinished item from loop-prompts.md Section 1 "Feature Backlog" (skip items whose git log messages indicate completion). Implement ONE item. Run npm run build — if it fails, fix until it passes. Commit with a descriptive message and push to the current branch. If ALL items are done, pick from Section 2 instead.
 ```
 
----
-
-## 1. Daily Feature Builder (Recommended — Main Loop)
-
+**Run a specialized loop alongside it:**
 ```
-You are the self-improving engine for weave-fabric-forms. Your job is to pick ONE meaningful improvement, implement it, verify it builds with `npm run build`, commit, and push.
-
-STEP 1 — Assess current state:
-- Read CLAUDE.md, loop-prompts.md, and src/types.ts
-- Scan src/components/ and src/data/flows.ts for what exists
-- Check git log for recent improvements already made (avoid duplicates)
-
-STEP 2 — Pick the NEXT improvement from this priority list (skip any already done):
-
-Priority A — Core Missing Features:
-1. localStorage persistence: save/restore answers per flow so users can resume
-2. Flow completion tracking: track which flows are done, show checkmarks on FlowList
-3. Data export: serialize all answers + memoryTags into a JSON payload for backend
-4. Input validation: required fields, min/max length, format patterns
-5. Keyboard navigation: Enter to advance, Escape to go back, tab focus management
-
-Priority B — New Screen Types:
-6. DatePickerScreen: month/day/year selector for birthdays, dates
-7. SliderScreen: range slider with min/max/step for numeric preferences
-8. RankingScreen: drag-to-reorder list for ranking preferences
-9. ImageSelectScreen: grid of image cards for visual preference selection
-10. TagInputScreen: free-form tag entry with suggestions (for skills, interests)
-
-Priority C — UX Enhancements:
-11. Search/filter on FlowList page
-12. Animated transitions between screens (slide left/right based on direction)
-13. Haptic feedback patterns for mobile (navigator.vibrate)
-14. Progress summary: show answered vs total across all flows on landing page
-15. Dark mode toggle with CSS custom property swap
-16. Undo last answer (brief toast with undo button after advancing)
-
-Priority D — Code Quality:
-17. Add Vitest + React Testing Library, write tests for FlowEngine navigation logic
-18. Add ARIA labels and roles for screen reader accessibility
-19. Error boundary component wrapping FlowEngine
-20. Performance: React.lazy + Suspense for screen components
-
-STEP 3 — Implement the chosen improvement:
-- Keep changes minimal and focused on ONE item
-- Follow existing code style (React hooks, pure CSS, TypeScript strict)
-- Update types.ts if adding new screen types
-- Update CLAUDE.md if the architecture changes
-
-STEP 4 — Verify:
-- Run `npm run build` — must pass with zero errors
-- If build fails, fix the errors before committing
-
-STEP 5 — Commit and push:
-- Commit with a clear message describing what was added/changed
-- Push to the current branch
+/loop 20m Read CLAUDE.md. Check git log --oneline -20. Pick the next unfinished item from loop-prompts.md Section 3 "New Flows". Design and implement ONE new flow in src/data/flows.ts following existing patterns. Run npm run build. Commit and push.
 ```
 
 ---
 
-## 2. New Flow Creator
+## How These Prompts Are Designed
+
+Each prompt follows the **Verify → Assess → Act → Verify → Commit** pattern:
+
+1. **Verify context** — Read CLAUDE.md, check git log (survives compaction)
+2. **Assess state** — Determine what's already done via commit messages
+3. **Act** — Implement exactly ONE focused change
+4. **Verify** — `npm run build` must pass with zero errors
+5. **Commit & push** — Clear message describing the change
+
+Key principles:
+- **One change per cycle** — small, reviewable, git-bisectable commits
+- **Idempotent** — safe to re-run; checks git log to skip completed work
+- **Compaction-safe** — reads CLAUDE.md fresh each cycle (no reliance on conversation memory)
+- **Fail-safe** — if build fails, fix it; if fix fails 3 times, skip and move to next item
+
+---
+
+## Section 1: Feature Backlog (Priority Order)
+
+These are the core improvements, ordered by impact. The main `/loop` prompt works through this list sequentially.
+
+### Priority A — Core Infrastructure
+1. **localStorage persistence** — Save answers per flow to localStorage so users can resume incomplete flows. Use a `useLocalStorage` hook. Key format: `weave-flow-{flowId}`.
+2. **Flow completion tracking** — Track completed flows in localStorage. Show a checkmark overlay on completed flow cards in FlowList. Add a `completedFlows` state to App.
+3. **Data export** — Add an `exportFlowData()` utility that serializes all answers with their memoryTags into a structured JSON payload. Wire it to the completion screen as a "Copy to clipboard" action.
+4. **Input validation** — Add optional `validation` config to FlowScreen (required, minLength, maxLength, pattern). Show inline error messages. Disable Next when invalid.
+5. **Keyboard navigation** — Enter advances to next screen, Escape goes back. Arrow keys navigate options in select screens. Tab focuses interactive elements.
+
+### Priority B — New Screen Types
+6. **DatePickerScreen** — Three-column scroll selector for month/day/year. Add `'date-picker'` to ScreenType union. Create `src/components/screens/DatePickerScreen.tsx`. Wire into ScreenRenderer.
+7. **SliderScreen** — Range slider with min/max/step labels. Add `'slider'` to ScreenType. Add `min`, `max`, `step` optional fields to FlowScreen type.
+8. **RankingScreen** — Draggable list for ordering preferences. Add `'ranking'` to ScreenType. Use touch events for mobile drag-and-drop (no library).
+9. **TagInputScreen** — Free-form tag chips with autocomplete suggestions. Add `'tag-input'` to ScreenType. Enter/comma creates new tag.
+10. **ImageSelectScreen** — Grid of image cards with labels. Add `'image-select'` to ScreenType. Add optional `imageUrl` to options.
+
+### Priority C — UX Enhancements
+11. **Directional transitions** — Slide left when advancing, slide right when going back. Track direction in FlowEngine state. Use CSS `@keyframes` only.
+12. **Character count** — Show "X/Y characters" on text-input screens when maxLength is set. Subtle counter below the input.
+13. **Progress summary on FlowList** — Show "X of Y answered" on each flow card using localStorage data. Add an overall progress bar at the top of FlowList.
+14. **Search & filter on FlowList** — Sticky search bar at top of FlowList. Filter flows by title and category as user types. CSS-only show/hide animation.
+15. **Dark mode** — Toggle button on FlowList. Store preference in localStorage. Swap CSS custom properties via `[data-theme="dark"]` on root element. Dark palette: bg #1A1A2E, card #16213E, accent #E94560.
+16. **Undo toast** — After advancing, show a brief "Undo" toast (3s) that lets the user revert to previous screen with their answer restored.
+
+### Priority D — Code Quality & Robustness
+17. **Error boundary** — Create `ErrorBoundary.tsx` wrapping FlowEngine. Show friendly "Something went wrong" UI with "Back to flows" button. Log error details to console.
+18. **Component extraction** — Extract NavBar, ProgressBar, BottomNav from FlowEngine.tsx into `src/components/NavBar.tsx`, `ProgressBar.tsx`, `BottomNav.tsx`. Update imports.
+19. **ARIA accessibility** — Add aria-label to icon buttons, role="progressbar" to ProgressBar, aria-live="polite" to screen content area, proper form labels on inputs.
+20. **prefers-reduced-motion** — Add `@media (prefers-reduced-motion: reduce)` that disables all animations and transitions. Respect user's OS setting.
+
+---
+
+## Section 2: Extended Improvements
+
+Work through these after Section 1 is complete.
+
+21. **React.lazy + Suspense** — Lazy-load screen components for better initial bundle size. Add a minimal loading spinner.
+22. **useFlowNavigation hook** — Extract all navigation logic (next, back, skip, getNextIndex) from FlowEngine into a custom hook.
+23. **Haptic feedback** — Call `navigator.vibrate(10)` on chip select, button press, and screen transitions. Feature-detect first.
+24. **Long-press stepper** — NumberStepperScreen increments/decrements rapidly when button is held. Use `setInterval` on pointerdown, clear on pointerup.
+25. **Swipe gestures** — Touch swipe left = next, swipe right = back. Use `touchstart`/`touchend` delta detection. Min 50px threshold.
+26. **Completion confetti** — CSS-only confetti animation on the completion screen. Use `@keyframes` with pseudo-elements.
+27. **Flow categories grouping** — Group flows by category on FlowList with collapsible section headers.
+28. **Animated checkmark** — SVG stroke animation on the completion screen checkmark icon.
+29. **Focus indicators** — Add `:focus-visible` outlines on all interactive elements. Use brand color with 2px offset.
+30. **Screen reader progress** — Add visually-hidden text "Step X of Y" alongside the visual progress bar.
+
+---
+
+## Section 3: New Onboarding Flows
+
+Each flow should have 6-10 screens, an intro screen, memoryTags on all data screens, and skip rules where natural.
+
+31. **"your-goals"** — Goals & Aspirations: life goals, bucket list, 5-year plan, current priorities, what success means
+32. **"daily-routine"** — Daily Routine: wake time, morning habits, work hours, lunch preferences, evening wind-down, sleep schedule
+33. **"social-life"** — Social Life: introvert/extrovert scale, ideal weekend, how you make friends, social media usage, group size preference
+34. **"learning-growth"** — Learning & Growth: learning style, current courses/books, skills to develop, knowledge gaps, mentors
+35. **"creativity"** — Creativity & Expression: creative outlets, instruments played, writing habits, art preferences, creative goals
+36. **"pets-animals"** — Pets & Animals (detailed): pet names and breeds, care routine, vet preferences, pet food brands, animal causes
+37. **"spirituality"** — Spirituality & Mindfulness: meditation practice, spiritual traditions, gratitude habits, mindfulness tools, retreat interest
+38. **"sports-fitness"** — Sports & Fitness: favorite sports, workout routine, fitness goals, teams supported, sports to try
+39. **"music-taste"** — Music Taste: top genres, favorite artists, instruments, concert frequency, playlist style, music discovery method
+40. **"tech-gadgets"** — Tech & Gadgets: devices owned, OS preference, favorite apps, smart home setup, tech wishlist
+
+---
+
+## Section 4: Testing (Run Separately)
 
 ```
-You are a flow creator for weave-fabric-forms. Your job is to design and add ONE new onboarding flow.
-
-STEP 1 — Check what flows already exist:
-- Read src/data/flows.ts to see all current flow IDs and categories
-- Check git log for recently added flows (avoid duplicates)
-
-STEP 2 — Pick the next flow to create from this list (skip any already done):
-1. "your-goals" — Goals & Aspirations (life goals, bucket list, 5-year plan, current priorities)
-2. "daily-routine" — Daily Routine (wake time, morning habits, work schedule, evening wind-down)
-3. "social-life" — Social Life (introvert/extrovert, ideal weekend, social media usage, friend groups)
-4. "learning-growth" — Learning & Growth (learning style, current courses, skills wanted, books reading)
-5. "creativity" — Creativity & Expression (creative outlets, instruments, writing, art preferences)
-6. "pets-animals" — Pets & Animals (current pets detail, dream pets, animal causes, pet care style)
-7. "spirituality" — Spirituality & Mindfulness (meditation, spiritual practices, gratitude habits)
-8. "sports-fitness" — Sports & Fitness (favorite sports, workout routine, fitness goals, teams)
-9. "music-taste" — Music Taste (genres, artists, instruments, concert preferences, playlists)
-10. "tech-gadgets" — Tech & Gadgets (devices, OS preference, favorite apps, smart home setup)
-
-STEP 3 — Design the flow:
-- Create 6-10 screens using existing screen types
-- Include an intro screen with icon and description
-- Use appropriate screen types (text-input, multi-select, single-select, binary-choice, etc.)
-- Add skip rules for conditional sub-screens where natural
-- Include memoryTags on every data-collecting screen
-- Follow the pattern and tone of existing flows
-
-STEP 4 — Implement:
-- Add the new flow to src/data/flows.ts in the allFlows array
-- Follow existing code style exactly
-
-STEP 5 — Verify and commit:
-- Run `npm run build` — must pass
-- Commit with message like "Add [flow-name] onboarding flow"
-- Push to current branch
+/loop 20m Read CLAUDE.md. Check if vitest is in package.json. If not: install vitest @testing-library/react @testing-library/jest-dom @testing-library/user-event jsdom as dev deps, add test config to vite.config.ts, create src/test-setup.ts, add "test" script to package.json. If vitest exists: check git log for test files already written, then write the next missing test from this list — FlowEngine navigation forward/back/skip, skip rules routing, completion screen, ProgressBar step count, TextInputScreen, MultiSelectScreen, SingleSelectScreen, BinaryChoiceScreen, NumberStepperScreen, FlowList rendering and selection. Run npm run build && npx vitest run. Commit and push.
 ```
 
 ---
 
-## 3. UX Polish Loop
+## Hooks Setup (Optional — Recommended)
 
+Add to `.claude/settings.json` for deterministic enforcement alongside loops:
+
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'Remember: run npm run build before committing. TypeScript strict mode — no errors allowed.'"
+          }
+        ]
+      }
+    ]
+  }
+}
 ```
-You are a UX polisher for weave-fabric-forms. Your job is to find and fix ONE UX issue or add ONE small polish improvement.
 
-STEP 1 — Audit the current UX:
-- Read src/App.css, src/components/FlowEngine.tsx, and all screen components
-- Check git log for recent UX improvements
-
-STEP 2 — Pick ONE improvement (skip already done):
-1. Add smooth directional slide animations (left when advancing, right when going back)
-2. Add subtle press/active states to all interactive elements
-3. Add a "shake" animation on validation errors
-4. Improve the completion screen with confetti or animated checkmark
-5. Add loading skeleton on FlowList while flows initialize
-6. Add character count indicator on text-input screens
-7. Add "X of Y answered" subtitle per flow card on FlowList
-8. Add subtle gradient overlays on scroll overflow areas
-9. Improve chip wrapping and spacing on multi-select screens
-10. Add a "clear selection" button on multi-select and single-select screens
-11. Add micro-interactions: scale bounce on chip select, fade on skip
-12. Improve number-stepper with long-press to increment/decrement rapidly
-13. Add swipe gestures for next/back navigation on mobile
-14. Add a subtle parallax effect on the intro screen icon
-15. Smooth scroll to top on screen transitions
-
-STEP 3 — Implement with pure CSS + minimal JS. Keep changes small and focused.
-
-STEP 4 — Verify build passes with `npm run build`.
-
-STEP 5 — Commit and push with a descriptive message.
-```
+This reminds Claude to verify after every file edit — a safety net for the autonomous loops.
 
 ---
 
-## 4. Accessibility Improver
+## Tips for Running Loops
 
+### Recommended: Single focused loop
 ```
-You are an accessibility specialist for weave-fabric-forms. Your job is to find and fix ONE accessibility issue.
+/loop 10m <main loop prompt>
+```
+One loop at 10-minute intervals produces ~6 commits/hour. Over 8 hours that's ~48 improvements.
 
-STEP 1 — Audit accessibility:
-- Read all screen components in src/components/screens/
-- Read FlowEngine.tsx for navigation and focus management
-- Check git log for recent a11y fixes
+### Intensive: Parallel specialized loops
+```
+/loop 10m <Section 1 feature backlog prompt>
+/loop 15m <Section 3 new flows prompt>
+/loop 20m <Section 4 testing prompt>
+```
+Stagger intervals so they don't collide. Each checks git log independently.
 
-STEP 2 — Pick ONE improvement (skip already done):
-1. Add aria-label to all icon-only buttons (back button, next arrow)
-2. Add role="progressbar" with aria-valuenow/max to ProgressBar
-3. Add aria-live="polite" region for screen transitions so screen readers announce new content
-4. Add proper fieldset/legend grouping for multi-select and single-select options
-5. Add focus management: auto-focus first input when screen transitions
-6. Add keyboard support: Enter to select chips, Space for checkboxes
-7. Add skip-to-content link for keyboard users
-8. Add aria-selected/aria-checked states to chips and checkboxes
-9. Add proper heading hierarchy (h1 for question, h2 for subtitle)
-10. Add visible focus indicators (focus-visible outlines) for keyboard navigation
-11. Add aria-describedby linking subtitles to their questions
-12. Add prefers-reduced-motion media query to disable animations
-13. Ensure color contrast meets WCAG AA (check text-secondary opacity)
-14. Add proper form labels for all text inputs
-15. Add screen reader only text for progress ("Step 3 of 12")
-
-STEP 3 — Implement the fix. Follow WAI-ARIA best practices.
-
-STEP 4 — Verify build passes with `npm run build`.
-
-STEP 5 — Commit and push.
+### Monitoring
+Ask Claude anytime:
+```
+what scheduled tasks do I have?
+```
+```
+cancel the deploy check job
 ```
 
----
-
-## 5. Test Writer
-
-```
-You are a test engineer for weave-fabric-forms. Your job is to add or expand the test suite.
-
-STEP 1 — Check current test state:
-- Look for any test files (*.test.ts, *.test.tsx, *.spec.ts)
-- Check if Vitest is configured in package.json/vite.config.ts
-- Check git log for recent test additions
-
-STEP 2 — If no test framework exists yet:
-- Install vitest, @testing-library/react, @testing-library/jest-dom, jsdom as dev dependencies
-- Configure vitest in vite.config.ts
-- Create a test setup file
-
-STEP 3 — If framework exists, pick the next test to write (skip already done):
-1. FlowEngine: test forward navigation advances screen index
-2. FlowEngine: test back navigation decreases screen index
-3. FlowEngine: test skip logic jumps past sub-screens
-4. FlowEngine: test skip rules route to correct targetIndex
-5. FlowEngine: test completion screen renders at end of flow
-6. FlowEngine: test progress bar shows correct step count
-7. TextInputScreen: test value changes on input
-8. MultiSelectScreen: test toggling options on/off
-9. SingleSelectScreen: test selecting one option deselects others
-10. BinaryChoiceScreen: test yes/no selection
-11. NumberStepperScreen: test increment/decrement
-12. FlowList: test rendering all flows
-13. FlowList: test selecting a flow calls onSelect
-14. Integration: test completing a full short flow end-to-end
-
-STEP 4 — Write the test. Use React Testing Library idioms (getByRole, userEvent).
-
-STEP 5 — Run `npm run build` and `npx vitest run` — both must pass.
-
-STEP 6 — Commit and push.
-```
-
----
-
-## 6. Code Quality & Refactoring
-
-```
-You are a code quality engineer for weave-fabric-forms. Your job is to find and fix ONE code quality issue.
-
-STEP 1 — Audit the codebase:
-- Read FlowEngine.tsx, App.tsx, types.ts, and screen components
-- Check git log for recent refactors
-
-STEP 2 — Pick ONE improvement (skip already done):
-1. Extract NavBar, ProgressBar, BottomNav from FlowEngine.tsx into separate files
-2. Create a useFlowNavigation custom hook extracting navigation logic from FlowEngine
-3. Add an ErrorBoundary component wrapping FlowEngine with a friendly error UI
-4. Create a useLocalStorage hook for persisting answers
-5. Add React.memo to screen components to prevent unnecessary re-renders
-6. Extract screen rendering logic into a screenRegistry map instead of switch statement
-7. Add proper TypeScript discriminated unions for screen props (each type gets exact props)
-8. Create a useKeyboardNavigation hook for Enter/Escape/Arrow key handling
-9. Add CSS modules or scoped class naming to prevent style collisions
-10. Extract animation logic into a useScreenTransition hook
-
-STEP 3 — Implement the refactor. Ensure no behavior changes (pure refactor).
-
-STEP 4 — Verify build passes with `npm run build`.
-
-STEP 5 — Commit and push.
-```
-
----
-
-## 7. Documentation & DX Loop
-
-```
-You are a developer experience engineer for weave-fabric-forms. Your job is to improve ONE aspect of documentation or developer experience.
-
-STEP 1 — Check current state of docs and DX tooling:
-- Read CLAUDE.md, README.md, package.json
-- Check for any linting, formatting, or pre-commit configs
-- Check git log for recent DX improvements
-
-STEP 2 — Pick ONE improvement (skip already done):
-1. Add ESLint with recommended React + TypeScript rules
-2. Add Prettier with consistent formatting config
-3. Add a pre-commit hook (husky + lint-staged) for type-checking
-4. Add npm scripts: "test", "lint", "format"
-5. Add JSDoc comments to all exported types in types.ts
-6. Add a CONTRIBUTING.md with development workflow
-7. Add a storybook-like dev page that renders all screen types with sample data
-8. Update CLAUDE.md with new features as they are added
-9. Add a changelog or version tracking
-10. Add GitHub issue templates for bug reports and feature requests
-
-STEP 3 — Implement the improvement.
-
-STEP 4 — Verify build passes with `npm run build`.
-
-STEP 5 — Commit and push.
-```
-
----
-
-## Suggested Daily Schedule
-
-Run these loops at staggered intervals for continuous improvement:
-
-```
-/loop 30m <Daily Feature Builder prompt>
-```
-
-This single loop is enough for most days — it systematically works through the priority list. For intensive improvement sessions, you can run multiple loops:
-
-```
-/loop 30m <Daily Feature Builder prompt>
-/loop 1h <New Flow Creator prompt>
-/loop 2h <UX Polish Loop prompt>
-```
-
-Each loop checks git log to avoid duplicate work, so they're safe to run concurrently.
+### Important Notes
+- **Session-scoped**: Loops stop when you close the terminal. Use Desktop Scheduled Tasks for overnight/multi-day runs.
+- **3-day expiry**: Recurring tasks auto-delete after 3 days. Recreate if needed.
+- **Compaction-safe**: Prompts read CLAUDE.md fresh each cycle — they don't rely on conversation memory.
+- **Cost**: Each 10-minute cycle consumes API tokens. Monitor usage for long sessions.
