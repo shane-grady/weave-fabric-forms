@@ -53,6 +53,24 @@ function markFlowCompleted(flowId: string) {
   }
 }
 
+function isAnswerValid(type: import('../types').ScreenType, answer: Answer): boolean {
+  switch (type) {
+    case 'intro':
+    case 'number-stepper':
+      return true
+    case 'text-input':
+      return typeof answer === 'string' && answer.trim().length > 0
+    case 'multi-input':
+      return Array.isArray(answer) && answer.some((v) => typeof v === 'string' && v.trim().length > 0)
+    case 'multi-select':
+    case 'checkbox':
+      return Array.isArray(answer) && answer.length > 0
+    case 'single-select':
+    case 'binary-choice':
+      return answer != null && answer !== ''
+  }
+}
+
 export default function FlowEngine({
   flow,
   onExit,
@@ -187,6 +205,7 @@ export default function FlowEngine({
 
   const isIntro = screen.type === 'intro'
   const currentAnswer = answers[currentIndex] ?? null
+  const canAdvance = isAnswerValid(screen.type, currentAnswer)
 
   return (
     <div className="app">
@@ -204,6 +223,7 @@ export default function FlowEngine({
           </div>
           <BottomNav
             showSkip={!isIntro}
+            disabled={!canAdvance}
             onDone={onExit}
             onSkip={handleSkip}
             onNext={handleNext}
@@ -261,11 +281,13 @@ function ProgressBar({
 
 function BottomNav({
   showSkip,
+  disabled,
   onDone,
   onSkip,
   onNext,
 }: {
   showSkip: boolean
+  disabled: boolean
   onDone: () => void
   onSkip: () => void
   onNext: () => void
@@ -280,7 +302,12 @@ function BottomNav({
           Skip
         </button>
       )}
-      <button className="btn btn-next" onClick={onNext} type="button">
+      <button
+        className={`btn btn-next ${disabled ? 'btn-next--disabled' : ''}`}
+        onClick={disabled ? undefined : onNext}
+        type="button"
+        aria-disabled={disabled}
+      >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <line x1="5" y1="12" x2="19" y2="12" />
           <polyline points="12 5 19 12 12 19" />
