@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'Reminder: run npm run build before committing. TypeScript strict mode — no errors allowed.'"
+          }
+        ]
+      }
+    ]
+  }
+}
