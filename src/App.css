@@ -1370,6 +1370,68 @@ body {
 }
 
 /* ============================================
+   Confetti
+   ============================================ */
+
+.confetti {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.confetti::before,
+.confetti::after {
+  content: '';
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  top: -20px;
+  left: 10%;
+  animation: confettiFall 2.5s ease-in forwards;
+}
+
+.confetti::before {
+  background: #FFD700;
+  box-shadow:
+    40px 0 0 #E94560,
+    90px 0 0 #4ECDC4,
+    150px 0 0 #FFD700,
+    200px 0 0 #FF6B6B,
+    260px 0 0 #45B7D1,
+    310px 0 0 #96CEB4,
+    30px 0 0 #FF8A65;
+  animation-delay: 0s;
+}
+
+.confetti::after {
+  background: #E94560;
+  left: 5%;
+  box-shadow:
+    55px 0 0 #45B7D1,
+    110px 0 0 #FFD700,
+    170px 0 0 #96CEB4,
+    220px 0 0 #E94560,
+    275px 0 0 #FF6B6B,
+    325px 0 0 #4ECDC4,
+    70px 0 0 #DDA0DD;
+  animation-delay: 0.3s;
+}
+
+@keyframes confettiFall {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(600px) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+/* ============================================
    Undo Toast
    ============================================ */
 
