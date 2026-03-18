@@ -1138,6 +1138,31 @@ body {
   color: var(--text-secondary);
 }
 
+.flow-search-wrap {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  padding: 0 0 12px;
+  background: var(--bg);
+}
+
+.flow-search {
+  width: 100%;
+  padding: 14px 18px;
+  background: var(--card);
+  border-radius: var(--radius-input);
+  border: none;
+  font-family: var(--font);
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--text-primary);
+  outline: none;
+}
+
+.flow-search::placeholder {
+  color: var(--text-secondary);
+}
+
 .flow-grid {
   display: flex;
   flex-direction: column;
