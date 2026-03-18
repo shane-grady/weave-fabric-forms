@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, useEffect } from 'react'
 import type { Flow, Answer } from '../types'
 import IntroScreen from './screens/IntroScreen'
 import MultiSelectScreen from './screens/MultiSelectScreen'
@@ -9,6 +9,34 @@ import MultiInputScreen from './screens/MultiInputScreen'
 import CheckboxScreen from './screens/CheckboxScreen'
 import NumberStepperScreen from './screens/NumberStepperScreen'
 
+const STORAGE_PREFIX = 'weave-flow-'
+
+interface SavedFlowState {
+  answers: Record<number, Answer>
+  currentIndex: number
+}
+
+function loadFlowState(flowId: string): SavedFlowState | null {
+  try {
+    const raw = localStorage.getItem(STORAGE_PREFIX + flowId)
+    return raw ? JSON.parse(raw) : null
+  } catch {
+    return null
+  }
+}
+
+function saveFlowState(flowId: string, state: SavedFlowState) {
+  try {
+    localStorage.setItem(STORAGE_PREFIX + flowId, JSON.stringify(state))
+  } catch {
+    // Storage full — silently fail
+  }
+}
+
+function clearFlowState(flowId: string) {
+  localStorage.removeItem(STORAGE_PREFIX + flowId)
+}
+
 export default function FlowEngine({
   flow,
   onExit,
@@ -16,10 +44,17 @@ export default function FlowEngine({
   flow: Flow
   onExit: () => void
 }) {
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const [answers, setAnswers] = useState<Record<number, Answer>>({})
+  const saved = useMemo(() => loadFlowState(flow.id), [flow.id])
+  const [currentIndex, setCurrentIndex] = useState(saved?.currentIndex ?? 0)
+  const [answers, setAnswers] = useState<Record<number, Answer>>(saved?.answers ?? {})
   const [completed, setCompleted] = useState(false)
   const [animKey, setAnimKey] = useState(0)
+
+  useEffect(() => {
+    if (!completed) {
+      saveFlowState(flow.id, { answers, currentIndex })
+    }
+  }, [flow.id, answers, currentIndex, completed])
 
   const screen = flow.screens[currentIndex]
 
@@ -55,12 +90,13 @@ export default function FlowEngine({
     (targetIndex: number) => {
       setAnimKey((k) => k + 1)
       if (targetIndex >= flow.screens.length) {
+        clearFlowState(flow.id)
         setCompleted(true)
       } else {
         setCurrentIndex(targetIndex)
       }
     },
-    [flow.screens.length],
+    [flow.screens.length, flow.id],
   )
 
   const getNextIndex = useCallback(
