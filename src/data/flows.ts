@@ -1754,6 +1754,80 @@ const petsAnimals: Flow = {
   ],
 }
 
+// ─── Flow 22 · Spirituality & Mindfulness ────────────────────────
+const spirituality: Flow = {
+  id: 'spirituality',
+  title: 'Spirituality & Mindfulness',
+  category: 'Values & Beliefs',
+  introCopy:
+    'Your inner life matters. Whether it\'s meditation, faith, or quiet reflection — Weave can respect and support what grounds you.',
+  icon: '🕊️',
+  screens: [
+    {
+      type: 'intro',
+      question: 'Spirituality & Mindfulness',
+      introCopy:
+        'Your inner life matters. Whether it\'s meditation, faith, or quiet reflection — Weave can respect and support what grounds you.',
+    },
+    {
+      type: 'single-select',
+      question: 'How would you describe your spiritual life?',
+      options: [
+        'religious — active practice', 'spiritual but not religious',
+        'exploring / curious', 'secular / humanist',
+        'not something I think about', 'it\'s complicated',
+      ],
+      memoryTags: ['#spiritual-identity'],
+    },
+    {
+      type: 'binary-choice',
+      question: 'Do you meditate?',
+      memoryTags: ['#meditates'],
+      skipRules: [{ values: ['no'], targetIndex: 4 }],
+    },
+    {
+      type: 'single-select',
+      question: 'How often?',
+      options: [
+        'daily', 'a few times a week', 'weekly',
+        'when I remember', 'trying to build the habit',
+      ],
+      memoryTags: ['#meditation-frequency'],
+      isSubScreen: true,
+    },
+    {
+      type: 'multi-select',
+      question: 'Mindfulness practices?',
+      options: [
+        'meditation apps', 'breathwork', 'journaling', 'prayer',
+        'yoga', 'nature walks', 'gratitude practice', 'silence / solitude',
+        'reading spiritual texts', 'community / group practice', 'none',
+      ],
+      memoryTags: ['#mindfulness-practices'],
+    },
+    {
+      type: 'multi-select',
+      question: 'What tools or apps do you use?',
+      options: [
+        'Headspace', 'Calm', 'Insight Timer', 'Ten Percent Happier',
+        'a journal', 'timer app', 'none — I go analog',
+      ],
+      memoryTags: ['#mindfulness-tools'],
+    },
+    {
+      type: 'text-input',
+      question: 'What grounds you?',
+      placeholder: 'Morning walks, gratitude lists, Sunday church, time alone in nature',
+      memoryTags: ['#grounding-practices'],
+    },
+    {
+      type: 'binary-choice',
+      question: 'Interested in retreats?',
+      memoryTags: ['#retreat-interest'],
+    },
+  ],
+}
+
 // ─── Export All Flows ─────────────────────────────────────────────
 export const allFlows: Flow[] = [
   aboutYou,
@@ -1777,4 +1851,5 @@ export const allFlows: Flow[] = [
   learningGrowth,
   creativity,
   petsAnimals,
+  spirituality,
 ]
