@@ -1,9 +1,11 @@
 import { lazy, Suspense, useEffect, useRef } from 'react'
 import type { Flow, Answer } from '../types'
 import useFlowNavigation from '../hooks/useFlowNavigation'
+import useVoiceMode from '../hooks/useVoiceMode'
 import NavBar from './NavBar'
 import ProgressBar from './ProgressBar'
 import BottomNav from './BottomNav'
+import VoiceModeIndicator from './VoiceModeIndicator'
 
 const IntroScreen = lazy(() => import('./screens/IntroScreen'))
 const MultiSelectScreen = lazy(() => import('./screens/MultiSelectScreen'))
@@ -95,6 +97,15 @@ export default function FlowEngine({
 }) {
   const nav = useFlowNavigation(flow, onExit)
 
+  const voice = useVoiceMode({
+    screenType: nav.screen.type,
+    currentIndex: nav.currentIndex,
+    onChange: nav.handleChange,
+    currentAnswer: nav.currentAnswer,
+    screen: nav.screen,
+    onNext: nav.handleNext,
+  })
+
   // Swipe gesture detection
   const touchStartX = useRef(0)
   const navNextRef = useRef(nav.handleNext)
@@ -162,6 +173,9 @@ export default function FlowEngine({
       <div className="screen-card" key={nav.animKey} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
         <div className={`screen screen--${nav.direction}`} ref={screenRef}>
           <ProgressBar current={nav.mainStep} total={nav.totalMain} />
+          {voice.isEnabled && !isIntro && (
+            <VoiceModeIndicator isListening={voice.isListening} error={voice.error} />
+          )}
           <div className="screen-content" aria-live="polite">
             <Suspense fallback={<div className="screen-spinner" />}>
               <ScreenRenderer
@@ -169,6 +183,12 @@ export default function FlowEngine({
                 flowId={flow.id}
                 value={nav.currentAnswer}
                 onChange={nav.handleChange}
+                voiceSupported={voice.isSupported}
+                voiceEnabled={voice.isEnabled}
+                onToggleVoice={voice.toggleVoiceMode}
+                voiceError={voice.error}
+                voiceInterimTranscript={voice.interimTranscript}
+                onFieldFocus={voice.setFocusedFieldIndex}
               />
             </Suspense>
           </div>
@@ -199,15 +219,36 @@ function ScreenRenderer({
   flowId,
   value,
   onChange,
+  voiceSupported,
+  voiceEnabled,
+  onToggleVoice,
+  voiceError,
+  voiceInterimTranscript,
+  onFieldFocus,
 }: {
   screen: import('../types').FlowScreen
   flowId: string
   value: Answer
   onChange: (v: Answer) => void
+  voiceSupported: boolean
+  voiceEnabled: boolean
+  onToggleVoice: () => void
+  voiceError: string | null
+  voiceInterimTranscript: string
+  onFieldFocus: (index: number) => void
 }) {
   switch (screen.type) {
     case 'intro':
-      return <IntroScreen screen={screen} flowId={flowId} />
+      return (
+        <IntroScreen
+          screen={screen}
+          flowId={flowId}
+          voiceSupported={voiceSupported}
+          voiceEnabled={voiceEnabled}
+          onToggleVoice={onToggleVoice}
+          voiceError={voiceError}
+        />
+      )
     case 'multi-select':
       return <MultiSelectScreen screen={screen} value={value} onChange={onChange} />
     case 'single-select':
@@ -217,7 +258,14 @@ function ScreenRenderer({
     case 'text-input':
       return <TextInputScreen screen={screen} value={value} onChange={onChange} />
     case 'multi-input':
-      return <MultiInputScreen screen={screen} value={value} onChange={onChange} />
+      return (
+        <MultiInputScreen
+          screen={screen}
+          value={value}
+          onChange={onChange}
+          onFieldFocus={onFieldFocus}
+        />
+      )
     case 'checkbox':
       return <CheckboxScreen screen={screen} value={value} onChange={onChange} />
     case 'number-stepper':
@@ -229,7 +277,14 @@ function ScreenRenderer({
     case 'ranking':
       return <RankingScreen screen={screen} value={value} onChange={onChange} />
     case 'tag-input':
-      return <TagInputScreen screen={screen} value={value} onChange={onChange} />
+      return (
+        <TagInputScreen
+          screen={screen}
+          value={value}
+          onChange={onChange}
+          voiceInterimTranscript={voiceEnabled ? voiceInterimTranscript : undefined}
+        />
+      )
     case 'image-select':
       return <ImageSelectScreen screen={screen} value={value} onChange={onChange} />
   }

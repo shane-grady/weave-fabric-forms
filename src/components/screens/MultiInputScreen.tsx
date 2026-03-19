@@ -4,10 +4,12 @@ export default function MultiInputScreen({
   screen,
   value,
   onChange,
+  onFieldFocus,
 }: {
   screen: FlowScreen
   value: Answer
   onChange: (v: Answer) => void
+  onFieldFocus?: (index: number) => void
 }) {
   const values = (value as string[]) ?? screen.fields?.map(() => '') ?? []
 
@@ -30,6 +32,7 @@ export default function MultiInputScreen({
               placeholder={field.placeholder}
               value={values[i] ?? ''}
               onChange={(e) => update(i, e.target.value)}
+              onFocus={() => onFieldFocus?.(i)}
             />
           </div>
         ))}
