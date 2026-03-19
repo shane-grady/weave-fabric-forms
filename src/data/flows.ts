@@ -1670,6 +1670,90 @@ const creativity: Flow = {
   ],
 }
 
+// ─── Flow 21 · Pets & Animals ────────────────────────────────────
+const petsAnimals: Flow = {
+  id: 'pets-animals',
+  title: 'Pets & Animals',
+  category: 'Relationships & People',
+  introCopy:
+    'Your furry (or scaly) family members matter. Help Weave remember their names, needs, and quirks.',
+  icon: '🐾',
+  screens: [
+    {
+      type: 'intro',
+      question: 'Pets & Animals',
+      introCopy:
+        'Your furry (or scaly) family members matter. Help Weave remember their names, needs, and quirks.',
+    },
+    {
+      type: 'multi-select',
+      question: 'What pets do you have?',
+      options: [
+        'dog', 'cat', 'fish', 'bird', 'rabbit', 'hamster / guinea pig',
+        'reptile', 'horse', 'multiple types', 'none — but I want one',
+        'none — not a pet person',
+      ],
+      memoryTags: ['#pet-types'],
+      skipRules: [
+        { values: ['none — not a pet person'], targetIndex: 8 },
+      ],
+    },
+    {
+      type: 'text-input',
+      question: 'Tell us their names and details',
+      placeholder: 'Luna — golden retriever, 3 yrs. Mochi — tabby cat, loves boxes',
+      memoryTags: ['#pet-details'],
+    },
+    {
+      type: 'single-select',
+      question: 'Pet care style?',
+      options: [
+        'very hands-on — scheduled everything',
+        'attentive but relaxed',
+        'they run the house honestly',
+        'shared responsibility with family',
+        'mostly independent pets',
+      ],
+      memoryTags: ['#pet-care-style'],
+    },
+    {
+      type: 'text-input',
+      question: 'Vet and care providers?',
+      placeholder: 'Dr. Kim at Paws Clinic, groomer every 6 weeks, dog walker on weekdays',
+      memoryTags: ['#pet-care-providers'],
+    },
+    {
+      type: 'multi-select',
+      question: 'Pet food preferences?',
+      options: [
+        'premium kibble', 'raw diet', 'wet food', 'home-cooked',
+        'grain-free', 'prescription diet', 'whatever they like',
+        'treats obsessed',
+      ],
+      memoryTags: ['#pet-food'],
+    },
+    {
+      type: 'binary-choice',
+      question: 'Involved in animal causes?',
+      memoryTags: ['#animal-causes'],
+      skipRules: [{ values: ['no'], targetIndex: 8 }],
+    },
+    {
+      type: 'text-input',
+      question: 'Which causes or organizations?',
+      placeholder: 'Volunteer at local shelter, donate to ASPCA, foster kittens',
+      memoryTags: ['#animal-cause-details'],
+      isSubScreen: true,
+    },
+    {
+      type: 'text-input',
+      question: 'Dream pet?',
+      placeholder: "A corgi named Biscuit, or honestly a mini pig if my apartment allowed it",
+      memoryTags: ['#dream-pet'],
+    },
+  ],
+}
+
 // ─── Export All Flows ─────────────────────────────────────────────
 export const allFlows: Flow[] = [
   aboutYou,
@@ -1692,4 +1776,5 @@ export const allFlows: Flow[] = [
   socialLife,
   learningGrowth,
   creativity,
+  petsAnimals,
 ]
