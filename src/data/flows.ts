@@ -1828,6 +1828,89 @@ const spirituality: Flow = {
   ],
 }
 
+// ─── Flow 23 · Sports & Fitness ──────────────────────────────────
+const sportsFitness: Flow = {
+  id: 'sports-fitness',
+  title: 'Sports & Fitness',
+  category: 'Health & Wellness',
+  introCopy:
+    'From pickup games to marathon training — knowing how you move helps Weave with scheduling, nutrition, and motivation.',
+  icon: '⚽',
+  screens: [
+    {
+      type: 'intro',
+      question: 'Sports & Fitness',
+      introCopy:
+        'From pickup games to marathon training — knowing how you move helps Weave with scheduling, nutrition, and motivation.',
+    },
+    {
+      type: 'multi-select',
+      question: 'Sports you play or follow?',
+      options: [
+        'basketball', 'soccer / football', 'tennis', 'golf',
+        'running', 'swimming', 'cycling', 'baseball',
+        'volleyball', 'martial arts', 'skiing / snowboarding',
+        'surfing', 'boxing', 'none',
+      ],
+      memoryTags: ['#sports'],
+    },
+    {
+      type: 'multi-select',
+      question: 'Your workout routine?',
+      options: [
+        'weight training', 'cardio', 'HIIT', 'yoga / pilates',
+        'running / jogging', 'group classes', 'home workouts',
+        'outdoor activities', 'team sports', 'no routine right now',
+      ],
+      memoryTags: ['#workout-routine'],
+    },
+    {
+      type: 'single-select',
+      question: 'How often do you work out?',
+      options: [
+        'every day', '4-5 times a week', '2-3 times a week',
+        'once a week', 'a few times a month', 'rarely',
+      ],
+      memoryTags: ['#workout-frequency'],
+    },
+    {
+      type: 'text-input',
+      question: 'Fitness goals?',
+      placeholder: 'Run a sub-4-hour marathon, gain 10lbs of muscle, just stay consistent',
+      memoryTags: ['#fitness-goals'],
+    },
+    {
+      type: 'binary-choice',
+      question: 'Do you follow any teams?',
+      memoryTags: ['#follows-teams'],
+      skipRules: [{ values: ['no'], targetIndex: 7 }],
+    },
+    {
+      type: 'text-input',
+      question: 'Which teams?',
+      placeholder: 'Lakers, Arsenal, Yankees — game day is sacred',
+      memoryTags: ['#favorite-teams'],
+      isSubScreen: true,
+    },
+    {
+      type: 'multi-select',
+      question: 'Sports you want to try?',
+      options: [
+        'rock climbing', 'surfing', 'martial arts', 'golf',
+        'tennis', 'dance', 'yoga', 'boxing', 'skiing',
+        'scuba diving', 'nothing new', 'other',
+      ],
+      memoryTags: ['#sports-to-try'],
+    },
+    {
+      type: 'text-input',
+      question: 'Anything else about fitness?',
+      placeholder: 'Training for a triathlon, I have a bad knee, gym is my therapy',
+      memoryTags: ['#fitness-notes'],
+    },
+  ],
+}
+
 // ─── Export All Flows ─────────────────────────────────────────────
 export const allFlows: Flow[] = [
   aboutYou,
@@ -1852,4 +1935,5 @@ export const allFlows: Flow[] = [
   creativity,
   petsAnimals,
   spirituality,
+  sportsFitness,
 ]
