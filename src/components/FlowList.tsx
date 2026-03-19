@@ -61,6 +61,7 @@ const FLOW_ICONS: Record<string, string> = {
   'creativity': '🎨',
   'pets-animals': '🐾',
   'spirituality': '🕊️',
+  'sports-fitness': '⚽',
 }
 
 export default function FlowList({
