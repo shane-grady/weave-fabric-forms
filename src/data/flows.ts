@@ -1996,6 +1996,92 @@ const musicTaste: Flow = {
   ],
 }
 
+// ─── Flow 25 · Tech & Gadgets ────────────────────────────────────
+const techGadgets: Flow = {
+  id: 'tech-gadgets',
+  title: 'Tech & Gadgets',
+  category: 'Digital Life & Tools',
+  introCopy:
+    'Your tech setup shapes how Weave can help — from device recommendations to workflow tips.',
+  icon: '🖥️',
+  screens: [
+    {
+      type: 'intro',
+      question: 'Tech & Gadgets',
+      introCopy:
+        'Your tech setup shapes how Weave can help — from device recommendations to workflow tips.',
+    },
+    {
+      type: 'multi-select',
+      question: 'Devices you own?',
+      options: [
+        'iPhone', 'Android phone', 'MacBook', 'Windows laptop',
+        'iPad / tablet', 'desktop PC', 'Apple Watch', 'smart speaker',
+        'gaming console', 'e-reader', 'drone', 'VR headset',
+      ],
+      memoryTags: ['#devices-owned'],
+    },
+    {
+      type: 'single-select',
+      question: 'OS preference?',
+      options: [
+        'Apple ecosystem all the way', 'mostly Apple, some others',
+        'mostly Windows / Android', 'Linux enthusiast',
+        'mix of everything', 'no strong preference',
+      ],
+      memoryTags: ['#os-preference'],
+    },
+    {
+      type: 'text-input',
+      question: 'Favorite apps?',
+      placeholder: 'Notion for everything, Spotify, Arc browser, Raycast',
+      memoryTags: ['#favorite-apps'],
+    },
+    {
+      type: 'single-select',
+      question: 'How would you describe your tech savviness?',
+      options: [
+        'power user — I optimize everything',
+        'comfortable — I know my way around',
+        'average — I use what I need',
+        'still learning — tech can be overwhelming',
+      ],
+      memoryTags: ['#tech-savviness'],
+    },
+    {
+      type: 'binary-choice',
+      question: 'Have a smart home setup?',
+      memoryTags: ['#has-smart-home-detailed'],
+      skipRules: [{ values: ['no'], targetIndex: 7 }],
+    },
+    {
+      type: 'text-input',
+      question: 'What\'s in your smart home?',
+      placeholder: 'Hue lights, Nest thermostat, Ring doorbell, HomePod in every room',
+      memoryTags: ['#smart-home-details'],
+      isSubScreen: true,
+    },
+    {
+      type: 'text-input',
+      question: 'Tech wishlist?',
+      placeholder: 'Vision Pro, a 3D printer, better monitor setup, home lab server',
+      memoryTags: ['#tech-wishlist'],
+    },
+    {
+      type: 'single-select',
+      question: 'Early adopter or late majority?',
+      options: [
+        'day-one buyer — I need the latest',
+        'early adopter — first few months',
+        'wait for reviews — a year or so',
+        'if it ain\'t broke, don\'t upgrade',
+        'I avoid new tech until forced',
+      ],
+      memoryTags: ['#adoption-style'],
+    },
+  ],
+}
+
 // ─── Export All Flows ─────────────────────────────────────────────
 export const allFlows: Flow[] = [
   aboutYou,
@@ -2022,4 +2108,5 @@ export const allFlows: Flow[] = [
   spirituality,
   sportsFitness,
   musicTaste,
+  techGadgets,
 ]
