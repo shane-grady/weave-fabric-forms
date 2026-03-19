@@ -1911,6 +1911,91 @@ const sportsFitness: Flow = {
   ],
 }
 
+// ─── Flow 24 · Music Taste ───────────────────────────────────────
+const musicTaste: Flow = {
+  id: 'music-taste',
+  title: 'Music Taste',
+  category: 'Preferences — Music',
+  introCopy:
+    'Your soundtrack says a lot about you. Help Weave understand what moves you — from daily playlists to live shows.',
+  icon: '🎵',
+  screens: [
+    {
+      type: 'intro',
+      question: 'Music Taste',
+      introCopy:
+        'Your soundtrack says a lot about you. Help Weave understand what moves you — from daily playlists to live shows.',
+    },
+    {
+      type: 'multi-select',
+      question: 'Top genres?',
+      options: [
+        'pop', 'hip-hop / rap', 'r&b / soul', 'rock', 'indie',
+        'electronic / EDM', 'jazz', 'classical', 'country',
+        'latin', 'k-pop', 'metal', 'lo-fi', 'folk / acoustic',
+        'reggae', 'a bit of everything',
+      ],
+      memoryTags: ['#music-genres'],
+    },
+    {
+      type: 'text-input',
+      question: 'Favorite artists right now?',
+      placeholder: 'Tyler the Creator, Billie Eilish, Khruangbin, Frank Ocean',
+      memoryTags: ['#favorite-artists'],
+    },
+    {
+      type: 'binary-choice',
+      question: 'Do you play any instruments?',
+      memoryTags: ['#plays-music'],
+      skipRules: [{ values: ['no'], targetIndex: 5 }],
+    },
+    {
+      type: 'text-input',
+      question: 'What do you play?',
+      placeholder: 'Guitar and a little piano — mostly for fun',
+      memoryTags: ['#instruments-played'],
+      isSubScreen: true,
+    },
+    {
+      type: 'single-select',
+      question: 'How often do you go to concerts?',
+      options: [
+        'all the time — multiple a month', 'a few times a year',
+        'once or twice a year', 'rarely',
+        'never — but I want to', 'not my thing',
+      ],
+      memoryTags: ['#concert-frequency'],
+    },
+    {
+      type: 'single-select',
+      question: 'How do you discover new music?',
+      options: [
+        'algorithm (Spotify Discover, etc)', 'friends & word of mouth',
+        'social media / TikTok', 'radio / curated playlists',
+        'music blogs & reviews', 'live shows / festivals',
+        'I mostly stick to what I know',
+      ],
+      memoryTags: ['#music-discovery'],
+    },
+    {
+      type: 'single-select',
+      question: 'Playlist style?',
+      options: [
+        'mood-based playlists', 'genre playlists', 'one big shuffle',
+        'albums front to back', 'whatever the algorithm gives me',
+        "I don't really make playlists",
+      ],
+      memoryTags: ['#playlist-style'],
+    },
+    {
+      type: 'text-input',
+      question: 'Music hot take?',
+      placeholder: "Vinyl sounds the same as digital and I'll die on that hill",
+      memoryTags: ['#music-hot-take'],
+    },
+  ],
+}
+
 // ─── Export All Flows ─────────────────────────────────────────────
 export const allFlows: Flow[] = [
   aboutYou,
@@ -1936,4 +2021,5 @@ export const allFlows: Flow[] = [
   petsAnimals,
   spirituality,
   sportsFitness,
+  musicTaste,
 ]

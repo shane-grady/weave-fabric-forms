@@ -24,6 +24,7 @@ const FLOW_ICONS: Record<string, string> = {
   'pets-animals': '🐾',
   'spirituality': '🕊️',
   'sports-fitness': '⚽',
+  'music-taste': '🎵',
 }
 
 export default function IntroScreen({
