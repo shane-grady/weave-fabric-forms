@@ -1,17 +1,26 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import type { FlowScreen, Answer } from '../../types'
 
 export default function TagInputScreen({
   screen,
   value,
   onChange,
+  voiceInterimTranscript,
 }: {
   screen: FlowScreen
   value: Answer
   onChange: (v: Answer) => void
+  voiceInterimTranscript?: string
 }) {
   const tags: string[] = Array.isArray(value) ? value : []
   const [input, setInput] = useState('')
+
+  // Show voice interim transcript as preview in the input field
+  useEffect(() => {
+    if (voiceInterimTranscript) {
+      setInput(voiceInterimTranscript)
+    }
+  }, [voiceInterimTranscript])
 
   const suggestions = useMemo(() => {
     if (!screen.options || !input.trim()) return []
