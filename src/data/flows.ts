@@ -1424,6 +1424,90 @@ const dailyRoutine: Flow = {
   ],
 }
 
+// ─── Flow 18 · Social Life ───────────────────────────────────────
+const socialLife: Flow = {
+  id: 'social-life',
+  title: 'Social Life',
+  category: 'Lifestyle',
+  introCopy:
+    'How you connect with people shapes the advice Weave gives — from weekend plans to meeting new friends.',
+  icon: '🎉',
+  screens: [
+    {
+      type: 'intro',
+      question: 'Social Life',
+      introCopy:
+        'How you connect with people shapes the advice Weave gives — from weekend plans to meeting new friends.',
+    },
+    {
+      type: 'single-select',
+      question: 'Where do you fall on the spectrum?',
+      subtitle: 'Introvert ↔ Extrovert',
+      options: [
+        'strong introvert', 'mostly introvert', 'ambivert — right in the middle',
+        'mostly extrovert', 'strong extrovert',
+      ],
+      memoryTags: ['#introvert-extrovert'],
+    },
+    {
+      type: 'multi-select',
+      question: 'Your ideal weekend?',
+      options: [
+        'solo time at home', 'brunch with friends', 'outdoor adventure',
+        'big social event', 'date night', 'family time',
+        'exploring somewhere new', 'catching up on sleep',
+        'working on a project', 'nothing planned',
+      ],
+      memoryTags: ['#ideal-weekend'],
+    },
+    {
+      type: 'single-select',
+      question: 'Preferred group size?',
+      options: [
+        'one-on-one', 'small group (3-5)', 'medium group (6-10)',
+        'the more the merrier', 'depends on the vibe',
+      ],
+      memoryTags: ['#group-size-preference'],
+    },
+    {
+      type: 'multi-select',
+      question: 'How do you meet new people?',
+      options: [
+        'through friends', 'at work', 'apps / online',
+        'hobbies & classes', 'events & parties', 'neighbors',
+        'gym / sports', "I don't really seek it out",
+      ],
+      memoryTags: ['#meeting-people'],
+    },
+    {
+      type: 'multi-select',
+      question: 'Social media you actually use?',
+      options: [
+        'Instagram', 'TikTok', 'Twitter/X', 'LinkedIn',
+        'Snapchat', 'Reddit', 'YouTube', 'Facebook',
+        'BeReal', 'Threads', 'none',
+      ],
+      memoryTags: ['#social-media-usage'],
+    },
+    {
+      type: 'single-select',
+      question: 'How often do you go out?',
+      options: [
+        'multiple times a week', 'once or twice a week',
+        'a few times a month', 'rarely — once a month or less',
+        'almost never', 'it comes in waves',
+      ],
+      memoryTags: ['#going-out-frequency'],
+    },
+    {
+      type: 'text-input',
+      question: 'Social energy?',
+      placeholder: 'I love people but need my recharge time. Fridays are sacred alone time',
+      memoryTags: ['#social-energy-notes'],
+    },
+  ],
+}
+
 // ─── Export All Flows ─────────────────────────────────────────────
 export const allFlows: Flow[] = [
   aboutYou,
@@ -1443,4 +1527,5 @@ export const allFlows: Flow[] = [
   importantStuff,
   yourGoals,
   dailyRoutine,
+  socialLife,
 ]
