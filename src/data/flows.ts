@@ -1593,6 +1593,83 @@ const learningGrowth: Flow = {
   ],
 }
 
+// ─── Flow 20 · Creativity & Expression ───────────────────────────
+const creativity: Flow = {
+  id: 'creativity',
+  title: 'Creativity & Expression',
+  category: 'Creativity',
+  introCopy:
+    "Whether you paint, play, write, or tinker — your creative side tells Weave a lot about how you think and what inspires you.",
+  icon: '🎨',
+  screens: [
+    {
+      type: 'intro',
+      question: 'Creativity & Expression',
+      introCopy:
+        "Whether you paint, play, write, or tinker — your creative side tells Weave a lot about how you think and what inspires you.",
+    },
+    {
+      type: 'multi-select',
+      question: 'Creative outlets?',
+      options: [
+        'writing', 'drawing / painting', 'photography', 'music',
+        'cooking', 'crafts / DIY', 'video / film', 'design',
+        'dance', 'coding as art', 'none right now', 'other',
+      ],
+      memoryTags: ['#creative-outlets'],
+    },
+    {
+      type: 'binary-choice',
+      question: 'Do you play an instrument?',
+      memoryTags: ['#plays-instrument'],
+      skipRules: [{ values: ['no'], targetIndex: 4 }],
+    },
+    {
+      type: 'text-input',
+      question: 'Which instruments?',
+      placeholder: 'Guitar for 10 years, just started piano',
+      memoryTags: ['#instruments'],
+      isSubScreen: true,
+    },
+    {
+      type: 'single-select',
+      question: 'How often do you create?',
+      options: [
+        'every day', 'a few times a week', 'weekends',
+        'when inspiration strikes', 'rarely — want to do more',
+        'almost never',
+      ],
+      memoryTags: ['#creative-frequency'],
+    },
+    {
+      type: 'multi-select',
+      question: 'What inspires you?',
+      options: [
+        'nature', 'music', 'other people', 'travel',
+        'emotions', 'architecture', 'books & stories', 'film',
+        'everyday life', 'solitude', 'deadlines',
+      ],
+      memoryTags: ['#inspiration-sources'],
+    },
+    {
+      type: 'single-select',
+      question: 'Do you share your creative work?',
+      options: [
+        'publicly — social media, portfolio', 'with close friends & family',
+        'only when asked', 'never — it stays private',
+        "I'd like to but haven't yet",
+      ],
+      memoryTags: ['#creative-sharing'],
+    },
+    {
+      type: 'text-input',
+      question: 'Creative goals?',
+      placeholder: 'Finish my novel, learn watercolor, start a YouTube channel',
+      memoryTags: ['#creative-goals'],
+    },
+  ],
+}
+
 // ─── Export All Flows ─────────────────────────────────────────────
 export const allFlows: Flow[] = [
   aboutYou,
@@ -1614,4 +1691,5 @@ export const allFlows: Flow[] = [
   dailyRoutine,
   socialLife,
   learningGrowth,
+  creativity,
 ]

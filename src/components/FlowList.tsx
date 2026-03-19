@@ -58,6 +58,7 @@ const FLOW_ICONS: Record<string, string> = {
   'daily-routine': '⏰',
   'social-life': '🎉',
   'learning-growth': '📚',
+  'creativity': '🎨',
 }
 
 export default function FlowList({
