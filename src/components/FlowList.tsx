@@ -56,6 +56,7 @@ const FLOW_ICONS: Record<string, string> = {
   'important-stuff': '📋',
   'your-goals': '🎯',
   'daily-routine': '⏰',
+  'social-life': '🎉',
 }
 
 export default function FlowList({
