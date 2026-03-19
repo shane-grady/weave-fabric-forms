@@ -1508,6 +1508,91 @@ const socialLife: Flow = {
   ],
 }
 
+// ─── Flow 19 · Learning & Growth ─────────────────────────────────
+const learningGrowth: Flow = {
+  id: 'learning-growth',
+  title: 'Learning & Growth',
+  category: 'Knowledge & Expertise',
+  introCopy:
+    'How you learn best and what you want to master helps Weave tailor explanations and recommend the right resources.',
+  icon: '📚',
+  screens: [
+    {
+      type: 'intro',
+      question: 'Learning & Growth',
+      introCopy:
+        'How you learn best and what you want to master helps Weave tailor explanations and recommend the right resources.',
+    },
+    {
+      type: 'single-select',
+      question: 'How do you learn best?',
+      options: [
+        'reading / articles', 'video / tutorials', 'hands-on / building',
+        'conversation / discussion', 'courses / structured programs',
+        'trial and error', 'a mix of everything',
+      ],
+      memoryTags: ['#learning-style'],
+    },
+    {
+      type: 'multi-select',
+      question: 'What are you learning right now?',
+      options: [
+        'a language', 'coding / tech', 'design', 'writing',
+        'business / entrepreneurship', 'music / instrument',
+        'cooking', 'fitness / nutrition', 'finance / investing',
+        'leadership / management', 'nothing specific', 'other',
+      ],
+      memoryTags: ['#active-learning'],
+    },
+    {
+      type: 'text-input',
+      question: 'Any courses or books in progress?',
+      placeholder: 'Reading Atomic Habits, halfway through a React course on Udemy',
+      memoryTags: ['#current-courses-books'],
+    },
+    {
+      type: 'multi-select',
+      question: 'Skills you want to develop?',
+      options: [
+        'public speaking', 'negotiation', 'data analysis',
+        'creative writing', 'leadership', 'time management',
+        'networking', 'emotional intelligence', 'technical skills',
+        'foreign language', 'financial literacy', 'other',
+      ],
+      memoryTags: ['#skills-to-develop'],
+    },
+    {
+      type: 'binary-choice',
+      question: 'Do you have a mentor or coach?',
+      memoryTags: ['#has-mentor'],
+      skipRules: [{ values: ['no'], targetIndex: 7 }],
+    },
+    {
+      type: 'text-input',
+      question: 'Tell us about them',
+      placeholder: 'My old boss Sarah — we chat monthly about career stuff',
+      memoryTags: ['#mentor-details'],
+      isSubScreen: true,
+    },
+    {
+      type: 'single-select',
+      question: 'How much time do you spend learning?',
+      options: [
+        'daily habit', 'a few hours a week', 'weekends mostly',
+        'when I feel like it', 'not enough — want to do more',
+        'barely any right now',
+      ],
+      memoryTags: ['#learning-time'],
+    },
+    {
+      type: 'text-input',
+      question: 'What knowledge gaps bother you?',
+      placeholder: "I wish I understood finance better, and I'm lost when people talk about AI",
+      memoryTags: ['#knowledge-gaps'],
+    },
+  ],
+}
+
 // ─── Export All Flows ─────────────────────────────────────────────
 export const allFlows: Flow[] = [
   aboutYou,
@@ -1528,4 +1613,5 @@ export const allFlows: Flow[] = [
   yourGoals,
   dailyRoutine,
   socialLife,
+  learningGrowth,
 ]

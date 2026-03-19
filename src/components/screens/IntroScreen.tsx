@@ -19,6 +19,7 @@ const FLOW_ICONS: Record<string, string> = {
   'your-goals': '🎯',
   'daily-routine': '⏰',
   'social-life': '🎉',
+  'learning-growth': '📚',
 }
 
 export default function IntroScreen({
